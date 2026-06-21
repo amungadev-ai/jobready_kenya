@@ -1,0 +1,357 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider     = "mysql"
+  url          = env("DATABASE_URL")
+}
+
+// ============================================================
+// ENUMS
+// ============================================================
+
+enum OrganizationType {
+  PRIVATE_COMPANY
+  PUBLIC_LISTED_COMPANY
+  NATIONAL_GOVERNMENT
+  COUNTY_GOVERNMENT
+  STATE_CORPORATION
+  REGULATORY_AUTHORITY
+  NGO_LOCAL
+  NGO_INTERNATIONAL
+  UNIVERSITY
+  TVET_INSTITUTION
+  PRIMARY_SECONDARY_SCHOOL
+  FOUNDATION
+  EMBASSY_DIPLOMATIC
+  RELIGIOUS_ORGANIZATION
+  COOPERATIVE_SOCIETY
+  STARTUP
+}
+
+enum OrganizationIndustry {
+  AGRICULTURE
+  AUTOMOTIVE
+  AVIATION
+  BANKING
+  CONSTRUCTION
+  CONSULTING
+  CONSUMER_GOODS
+  EDUCATION
+  ENERGY
+  ENVIRONMENT
+  FINTECH
+  FOOD_BEVERAGE
+  GOVERNMENT_PUBLIC_ADMIN
+  HEALTHCARE
+  HOSPITALITY_TOURISM
+  HUMAN_RESOURCES
+  INFORMATION_TECHNOLOGY
+  INSURANCE
+  INTERNATIONAL_DEVELOPMENT
+  LEGAL
+  LOGISTICS_SUPPLY_CHAIN
+  MANUFACTURING
+  MARKETING_ADVERTISING
+  MEDIA_ENTERTAINMENT
+  MINING
+  NON_PROFIT
+  PHARMACEUTICAL
+  REAL_ESTATE
+  RESEARCH
+  RETAIL
+  SECURITY_DEFENSE
+  SPORTS
+  TELECOMMUNICATIONS
+  TEXTILES_APPAREL
+  WATER_SANITATION
+}
+
+enum EmploymentType {
+  FULL_TIME
+  PART_TIME
+  CONTRACT
+  FREELANCE
+  INTERNSHIP
+  APPRENTICESHIP
+  TEMPORARY
+  CASUAL
+  VOLUNTEER
+}
+
+enum ExperienceLevel {
+  ENTRY
+  JUNIOR
+  MID
+  SENIOR
+  LEAD
+  EXECUTIVE
+}
+
+enum SalaryDisclosure {
+  NOT_DISCLOSED
+  NEGOTIABLE
+  COMPETITIVE
+  SHOW_RANGE
+}
+
+enum JobStatus {
+  ACTIVE
+  EXPIRED
+  PAUSED
+  DRAFT
+}
+
+enum EducationLevel {
+  NONE
+  HIGH_SCHOOL
+  CERTIFICATE
+  DIPLOMA
+  BACHELORS
+  MASTERS
+  DOCTORATE
+  PROFESSIONAL
+}
+
+enum JobSource {
+  MANUAL
+  SCRAPED
+  IMPORTED
+}
+
+enum OpportunityType {
+  SCHOLARSHIP
+  GRANT
+  FELLOWSHIP
+  SPONSORSHIP
+  MENTORSHIP
+  COMPETITION
+  CONFERENCE
+  TRAINING
+  VOLUNTEER
+}
+
+enum OpportunityStatus {
+  ACTIVE
+  EXPIRED
+  PAUSED
+  DRAFT
+}
+
+enum FundingDisclosure {
+  NOT_DISCLOSED
+  FULLY_FUNDED
+  PARTIALLY_FUNDED
+  SHOW_AMOUNT
+  NOT_FUNDED
+}
+
+// ============================================================
+// MODELS
+// ============================================================
+
+model Organization {
+  id             String  @id @default(cuid())
+  orgName        String  @map("org_name")
+  orgSlug        String  @unique @map("org_slug")
+  orgLogoUrl     String? @map("org_logo_url")
+  orgWebsite     String? @map("org_website")
+  orgDescription String? @map("org_description")
+
+  orgIndustry OrganizationIndustry @map("org_industry")
+  orgType     OrganizationType     @map("org_type")
+
+  headquarters String? @map("headquarters")
+  socialLinks  String? @map("social_links") // JSON string of social links
+
+  seoTitle       String? @map("seo_title")
+  seoDescription String? @map("seo_description")
+
+  deletedAt DateTime? @map("deleted_at")
+
+  isVerified Boolean @default(false) @map("is_verified")
+  isActive   Boolean @default(true) @map("is_active")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  jobs                  Job[]
+  providedOpportunities Opportunity[]
+
+  @@index([orgIndustry, orgType])
+  @@index([deletedAt])
+  @@map("organizations")
+}
+
+model JobCategory {
+  id          String  @id @default(cuid())
+  value       String  @unique
+  label       String
+  slug        String  @unique
+  description String?
+
+  seoTitle       String? @map("seo_title")
+  seoDescription String? @map("seo_description")
+
+  icon      String?
+  sortOrder Int     @default(0) @map("sort_order")
+
+  subcategories JobSubcategory[]
+  jobs          Job[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([value])
+  @@map("job_categories")
+}
+
+model JobSubcategory {
+  id          String  @id @default(cuid())
+  value       String  @unique
+  label       String
+  slug        String  @unique
+  description String?
+
+  seoTitle       String? @map("seo_title")
+  seoDescription String? @map("seo_description")
+
+  categoryId String @map("category_id")
+  sortOrder  Int    @default(0) @map("sort_order")
+
+  category JobCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  jobs     Job[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@unique([categoryId, value])
+  @@index([categoryId])
+  @@map("job_subcategories")
+}
+
+model Job {
+  id             String  @id @default(cuid())
+  organizationId String? @map("organization_id")
+  subcategoryId  String  @map("subcategory_id")
+  categoryId     String? @map("category_id")
+
+  title       String
+  slug        String @unique
+  description String
+
+  seoTitle       String? @map("seo_title")
+  seoDescription String? @map("seo_description")
+
+  jobSource      JobSource @default(MANUAL) @map("job_source")
+  sourceUrl      String?   @map("source_url")
+  sourcePlatform String?   @map("source_platform")
+
+  searchText String? @map("search_text")
+
+  experienceLevel ExperienceLevel? @map("experience_level")
+  employmentType  EmploymentType?  @map("employment_type")
+  educationLevel  EducationLevel?  @map("education_level")
+
+  howToApply     String? @map("how_to_apply")
+  applyEmail     String? @map("apply_email")
+  applicationUrl String? @map("application_url")
+
+  locationCity   String? @map("location_city")
+  locationCounty String? @map("location_county")
+  isRemote       Boolean @default(false) @map("is_remote")
+
+  salaryDisclosure SalaryDisclosure @default(NOT_DISCLOSED) @map("salary_disclosure")
+  salaryMin        Int?             @map("salary_min")
+  salaryMax        Int?             @map("salary_max")
+  salaryCurrency   String           @default("KES") @map("salary_currency")
+
+  status     JobStatus @default(ACTIVE)
+  featured   Boolean   @default(false)
+  datePosted DateTime  @default(now()) @map("date_posted")
+  deadline   DateTime? @map("deadline")
+
+  deletedAt DateTime? @map("deleted_at")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  organization Organization?  @relation(fields: [organizationId], references: [id], onDelete: SetNull)
+  category     JobCategory?   @relation(fields: [categoryId], references: [id])
+  subcategory  JobSubcategory @relation(fields: [subcategoryId], references: [id])
+
+  @@index([status])
+  @@index([featured])
+  @@index([employmentType])
+  @@index([experienceLevel])
+  @@index([locationCounty])
+  @@index([deadline])
+  @@index([subcategoryId])
+  @@index([categoryId])
+  @@index([datePosted])
+  @@index([status, featured])
+  @@index([deletedAt])
+  @@index([jobSource])
+  @@fulltext([searchText], map: "ft_search_text")
+  @@map("jobs")
+}
+
+model Opportunity {
+  id    String          @id @default(cuid())
+  type  OpportunityType
+  title String
+  slug  String          @unique
+
+  seoTitle       String? @map("seo_title")
+  seoDescription String? @map("seo_description")
+
+  providerName    String        @map("provider_name")
+  providerWebsite String?       @map("provider_website")
+  providerLogoUrl String?       @map("provider_logo_url")
+  providerOrgId   String?       @map("provider_org_id")
+  providerOrg     Organization? @relation(fields: [providerOrgId], references: [id], onDelete: SetNull)
+
+  description         String
+  eligibilityCriteria String? @map("eligibility_criteria")
+  requirements        String?
+  benefits            String?
+
+  locationCity   String? @map("location_city")
+  locationCounty String? @map("location_county")
+  isRemote       Boolean @default(false) @map("is_remote")
+  isOnline       Boolean @default(false) @map("is_online")
+
+  fundingDisclosure FundingDisclosure @default(NOT_DISCLOSED) @map("funding_disclosure")
+  fundingAmount     Int?              @map("funding_amount")
+  fundingCurrency   String            @default("KES") @map("funding_currency")
+
+  duration       String?
+  applicationUrl String? @map("application_url")
+  applyEmail     String? @map("apply_email")
+  howToApply     String? @map("how_to_apply")
+
+  openToInternational Boolean @default(false) @map("open_to_international")
+  targetDemographic   String? @map("target_demographic")
+
+  status   OpportunityStatus @default(ACTIVE)
+  featured Boolean           @default(false)
+
+  datePosted DateTime  @default(now()) @map("date_posted")
+  deadline   DateTime? @map("deadline")
+
+  deletedAt DateTime? @map("deleted_at")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([type])
+  @@index([status])
+  @@index([featured])
+  @@index([locationCounty])
+  @@index([deadline])
+  @@index([datePosted])
+  @@index([status, featured])
+  @@index([deletedAt])
+  @@map("opportunities")
+}
