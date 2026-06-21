@@ -1,0 +1,2136 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>JobBoard Kenya – Complete Homepage</title>
+
+  <!-- Font: Nunito -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700;800&display=swap" rel="stylesheet" />
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { font-family: 'Nunito', sans-serif; margin: 0; padding: 0; background: #faf9f6; }
+    .section-bg { background: #faf9f6; }
+
+    /* Hide scrollbar */
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+    /* Scroll buttons */
+    .scroll-btn {
+      background: white;
+      border: 1px solid #e5e7eb;
+      border-radius: 9999px;
+      width: 44px;
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      transition: all 0.2s ease;
+      z-index: 20;
+      color: #374151;
+    }
+    .scroll-btn:hover {
+      background: #ecfdf5;
+      border-color: #15803d;
+      color: #15803d;
+    }
+    .scroll-btn.disabled {
+      opacity: 0.3;
+      pointer-events: none;
+    }
+
+    /* Category item hover */
+    .category-item {
+      transition: all 0.15s ease;
+      cursor: default;
+    }
+    .category-item:hover {
+      background: #ecfdf5;
+      border-color: #15803d;
+    }
+    .category-item:hover .cat-icon {
+      transform: scale(1.05);
+    }
+    .cat-icon {
+      transition: transform 0.15s ease;
+    }
+
+    /* Location item hover */
+    .location-item {
+      transition: all 0.15s ease;
+      cursor: default;
+    }
+    .location-item:hover {
+      background: #ecfdf5;
+    }
+    .location-item:hover .loc-name {
+      color: #15803d;
+    }
+
+    /* Closing item hover */
+    .closing-item {
+      transition: all 0.1s ease;
+      cursor: default;
+    }
+    .closing-item:hover .closing-title {
+      color: #15803d;
+    }
+    .closing-item:hover .closing-company {
+      color: #374151;
+    }
+
+    /* Government item hover */
+    .gov-item {
+      transition: all 0.1s ease;
+      cursor: default;
+    }
+    .gov-item:hover .gov-title {
+      color: #15803d;
+    }
+    .gov-item:hover .gov-org {
+      color: #374151;
+    }
+
+    /* Tab styles */
+    .tab-btn {
+      transition: all 0.15s ease;
+    }
+    .tab-btn.active {
+      background: #15803d;
+      color: white;
+      box-shadow: 0 4px 6px -1px rgba(21, 128, 61, 0.2);
+    }
+    .tab-btn.active .tab-count {
+      color: #a7f3d0;
+    }
+    .tab-btn.inactive {
+      background: transparent;
+      color: #6b7280;
+    }
+    .tab-btn.inactive:hover {
+      background: #f3f4f6;
+      color: #374151;
+    }
+    .tab-btn .tab-count {
+      font-weight: 400;
+    }
+    .tab-content {
+      display: none;
+      animation: fadeIn 0.2s ease;
+    }
+    .tab-content.active {
+      display: block;
+    }
+    @keyframes fadeIn {
+      0% { opacity: 0; transform: translateY(4px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+
+    ul { padding-left: 0; }
+
+    .gov-badge {
+      font-size: 0.6rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      padding: 0.15rem 0.6rem;
+      border-radius: 999px;
+    }
+    .gov-badge.national {
+      background: #dbeafe;
+      color: #1d4ed8;
+    }
+    .gov-badge.county {
+      background: #d1fae5;
+      color: #065f46;
+    }
+
+    /* Job Matching Premium Card */
+    .matching-card {
+      background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 40%, #d1fae5 100%);
+      border: 1px solid #86efac;
+      border-radius: 1rem;
+    }
+    .matching-card .highlight {
+      background: linear-gradient(135deg, #15803d, #0d9488);
+      color: white;
+      border-radius: 9999px;
+      padding: 0.2rem 1rem;
+      font-size: 0.65rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      display: inline-block;
+    }
+    .matching-card .premium-badge {
+      background: linear-gradient(135deg, #fbbf24, #f59e0b);
+      color: #78350f;
+      font-size: 0.6rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      padding: 0.15rem 0.6rem;
+      border-radius: 9999px;
+      letter-spacing: 0.04em;
+      display: inline-block;
+      box-shadow: 0 2px 4px rgba(245, 158, 11, 0.3);
+    }
+    .matching-card .cta-btn {
+      background: linear-gradient(135deg, #15803d, #0d9488);
+      color: white;
+      font-weight: 700;
+      padding: 0.75rem 2rem;
+      border-radius: 9999px;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 12px rgba(21, 128, 61, 0.3);
+      display: inline-block;
+      border: none;
+      cursor: pointer;
+    }
+    .matching-card .cta-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(21, 128, 61, 0.4);
+    }
+    .matching-card .feature-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.875rem;
+      color: #374151;
+      padding: 0.3rem 0;
+    }
+    .matching-card .feature-item .check {
+      color: #15803d;
+      font-weight: 800;
+      font-size: 1.1rem;
+    }
+    .match-result {
+      background: white/70;
+      backdrop-filter: blur(4px);
+      border: 1px solid #d1fae5;
+      border-radius: 0.75rem;
+      padding: 0.75rem 1rem;
+      transition: all 0.15s ease;
+    }
+    .match-result:hover {
+      border-color: #15803d;
+      background: white/90;
+    }
+    .match-score {
+      font-size: 0.65rem;
+      font-weight: 800;
+      color: #15803d;
+      background: #d1fae5;
+      padding: 0.15rem 0.6rem;
+      border-radius: 9999px;
+      white-space: nowrap;
+    }
+    .match-score.high {
+      background: #d1fae5;
+      color: #065f46;
+    }
+    .match-score.medium {
+      background: #fef3c7;
+      color: #92400e;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ============================================================ -->
+  <!-- 1. HERO (locked)                                              -->
+  <!-- ============================================================ -->
+  <section class="section-bg py-12 md:py-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-start">
+        <div class="space-y-5">
+          <p class="text-sm font-semibold text-emerald-700 uppercase tracking-wider">Stop Searching. Start Matching.</p>
+          <h1 class="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-gray-800 leading-[1.15]">
+            Find Jobs That Fit You, <br /><span class="text-emerald-600">Not Just Your Keywords</span>
+          </h1>
+          <p class="text-base sm:text-lg text-gray-600 font-light leading-relaxed max-w-lg">
+            Discover verified jobs, internships, and opportunities matched to your skills and experience.
+            Get real-time alerts and apply directly to trusted employers across Kenya.
+          </p>
+          <div class="flex flex-col sm:flex-row items-stretch gap-2 w-full max-w-2xl pt-1">
+            <input type="text" placeholder="Job title, skill, or company" class="flex-1 px-4 py-2.5 rounded-lg border border-gray-300 bg-white text-sm focus:outline-none focus:border-emerald-600" />
+            <button class="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-6 py-2.5 rounded-lg whitespace-nowrap text-sm transition">Find Matching Jobs</button>
+          </div>
+          <div class="flex flex-wrap items-center gap-x-5 gap-y-2 pt-1">
+            <a href="#" class="inline-flex items-center gap-2 text-sm font-medium text-gray-700 hover:text-emerald-600 transition border border-gray-300 hover:border-emerald-500 px-4 py-1.5 rounded-full bg-white/50">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg> Upload Your CV
+            </a>
+            <div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-gray-600">
+              <span class="flex items-center"><span class="text-emerald-600 font-bold mr-1">✓</span> Verified employers</span>
+              <span class="flex items-center"><span class="text-emerald-600 font-bold mr-1">✓</span> Daily updates</span>
+              <span class="flex items-center"><span class="text-emerald-600 font-bold mr-1">✓</span> WhatsApp alerts</span>
+              <span class="flex items-center"><span class="text-emerald-600 font-bold mr-1">✓</span> Free CV upload</span>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="flex items-center justify-between border-b border-gray-200/70 pb-2 mb-3">
+            <div class="flex items-center gap-2">
+              <span class="inline-block w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+              <h2 class="text-xs font-bold text-gray-500 uppercase tracking-wider">Recently Posted</h2>
+            </div>
+            <a href="#" class="text-xs font-medium text-gray-400 hover:text-emerald-600 transition">View all →</a>
+          </div>
+          <ul class="divide-y divide-gray-200/50">
+            <li class="py-2.5 flex items-center justify-between"><div><span class="text-sm font-semibold text-gray-800">Senior Software Engineer</span><span class="text-sm text-gray-400 ml-2">Safaricom</span></div><span class="text-xs text-gray-300">2h</span></li>
+            <li class="py-2.5 flex items-center justify-between"><div><span class="text-sm font-semibold text-gray-800">Public Health Officer</span><span class="text-sm text-gray-400 ml-2">County Gov. Mombasa</span></div><span class="text-xs text-gray-300">4h</span></li>
+            <li class="py-2.5 flex items-center justify-between"><div><span class="text-sm font-semibold text-gray-800">IT Support Intern</span><span class="text-sm text-gray-400 ml-2">Equity Bank</span></div><span class="text-xs text-gray-300">1d</span></li>
+            <li class="py-2.5 flex items-center justify-between"><div><span class="text-sm font-semibold text-gray-800">Project Coordinator</span><span class="text-sm text-gray-400 ml-2">UNICEF</span></div><span class="text-xs text-gray-300">2d</span></li>
+            <li class="py-2.5 flex items-center justify-between"><div><span class="text-sm font-semibold text-gray-800">Retail Sales Assistant</span><span class="text-sm text-gray-400 ml-2">Naivas</span></div><span class="text-xs text-gray-300">3h</span></li>
+          </ul>
+          <div class="mt-4 pt-1 border-t border-gray-200/50 flex justify-start">
+            <a href="#" class="text-sm font-semibold text-emerald-600 hover:text-emerald-700 transition inline-flex items-center gap-1.5">
+              Browse all latest jobs <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- 2. OFFICIAL UPDATES                                           -->
+  <!-- ============================================================ -->
+  <section class="section-bg py-10 border-t border-gray-200/50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div class="lg:col-span-2">
+          <div class="flex items-center justify-between mb-6">
+            <div>
+              <h2 class="text-2xl font-extrabold text-gray-800">Official Updates</h2>
+              <p class="text-sm text-gray-500 font-light">Stay informed with recruitment notices, shortlisting updates, and application announcements.</p>
+            </div>
+            <a href="#" class="text-sm font-semibold text-emerald-600 hover:text-emerald-700 transition whitespace-nowrap ml-4">View all →</a>
+          </div>
+          <div class="bg-white/50 backdrop-blur-sm rounded-xl divide-y divide-gray-200/60 border border-white/60">
+            <div class="flex items-start gap-4 py-3.5 px-4 rounded-xl hover:bg-white/40 transition"><span class="text-xl mt-0.5">📢</span><div><p class="text-sm font-semibold text-gray-800">KNEC announces shortlisted candidates for 2026 recruitment</p><div class="flex items-center gap-3 mt-0.5"><span class="text-xs text-gray-400">Shortlisting</span><span class="text-xs text-gray-300">•</span><span class="text-xs text-gray-300">2h ago</span></div></div></div>
+            <div class="flex items-start gap-4 py-3.5 px-4 rounded-xl hover:bg-white/40 transition"><span class="text-xl mt-0.5">📅</span><div><p class="text-sm font-semibold text-gray-800">KRA interviews for tax officers scheduled for 28 June</p><div class="flex items-center gap-3 mt-0.5"><span class="text-xs text-gray-400">Interview Date</span><span class="text-xs text-gray-300">•</span><span class="text-xs text-gray-300">5h ago</span></div></div></div>
+            <div class="flex items-start gap-4 py-3.5 px-4 rounded-xl hover:bg-white/40 transition"><span class="text-xl mt-0.5">📋</span><div><p class="text-sm font-semibold text-gray-800">County government of Nakuru opens 50 new positions</p><div class="flex items-center gap-3 mt-0.5"><span class="text-xs text-gray-400">Recruitment</span><span class="text-xs text-gray-300">•</span><span class="text-xs text-gray-300">1d ago</span></div></div></div>
+            <div class="flex items-start gap-4 py-3.5 px-4 rounded-xl hover:bg-white/40 transition"><span class="text-xl mt-0.5">⏳</span><div><p class="text-sm font-semibold text-gray-800">TSC extends application deadline to 30 June</p><div class="flex items-center gap-3 mt-0.5"><span class="text-xs text-gray-400">Deadline Extension</span><span class="text-xs text-gray-300">•</span><span class="text-xs text-gray-300">2d ago</span></div></div></div>
+          </div>
+        </div>
+        <div class="lg:col-span-1 space-y-6">
+          <div class="bg-gray-100 rounded-xl flex items-center justify-center h-64 border border-gray-200 text-gray-400 text-sm">📢 Google Ad (300x250)</div>
+          <div class="bg-emerald-50 rounded-xl p-4 border border-emerald-100/60">
+            <div class="flex items-center gap-2"><span class="text-xl">📬</span><h3 class="text-sm font-bold text-gray-800">Get alerts</h3></div>
+            <p class="text-xs text-gray-600 mt-0.5">Receive WhatsApp notifications for new jobs.</p>
+            <button class="mt-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-4 py-1.5 rounded-full transition">Subscribe</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- 3. CLOSING SOON                                               -->
+  <!-- ============================================================ -->
+  <section class="section-bg py-10 border-t border-gray-200/50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div class="lg:col-span-2">
+          <div class="flex items-center justify-between mb-6">
+            <div>
+              <h2 class="text-2xl font-extrabold text-gray-800 flex items-center gap-2">⏳ Don't Miss These Deadlines</h2>
+              <p class="text-sm text-gray-500 font-light">Applications closing soon. Submit your application before time runs out.</p>
+            </div>
+            <a href="#" class="text-sm font-semibold text-emerald-600 hover:text-emerald-700 transition whitespace-nowrap ml-4">View All Deadlines →</a>
+          </div>
+          <ul class="divide-y divide-gray-200/50 bg-white/40 backdrop-blur-sm rounded-xl border border-white/60 px-4">
+            <li class="closing-item py-3 flex items-center justify-between"><div><span class="closing-title text-sm font-semibold text-gray-800 transition">Marketing Manager</span><span class="closing-company text-sm text-gray-400 ml-2 transition">Co-op Bank</span></div><span class="text-xs font-medium text-red-600">2 days</span></li>
+            <li class="closing-item py-3 flex items-center justify-between"><div><span class="closing-title text-sm font-semibold text-gray-800 transition">Data Analyst</span><span class="closing-company text-sm text-gray-400 ml-2 transition">KRA</span></div><span class="text-xs font-medium text-red-600">4 days</span></li>
+            <li class="closing-item py-3 flex items-center justify-between"><div><span class="closing-title text-sm font-semibold text-gray-800 transition">Nurse</span><span class="closing-company text-sm text-gray-400 ml-2 transition">County Gov. Kisumu</span></div><span class="text-xs font-medium text-red-600">5 days</span></li>
+            <li class="closing-item py-3 flex items-center justify-between"><div><span class="closing-title text-sm font-semibold text-gray-800 transition">Civil Engineer</span><span class="closing-company text-sm text-gray-400 ml-2 transition">KURA</span></div><span class="text-xs font-medium text-red-600">6 days</span></li>
+            <li class="closing-item py-3 flex items-center justify-between"><div><span class="closing-title text-sm font-semibold text-gray-800 transition">Finance Officer</span><span class="closing-company text-sm text-gray-400 ml-2 transition">UNICEF</span></div><span class="text-xs font-medium text-red-600">7 days</span></li>
+            <li class="closing-item py-3 flex items-center justify-between"><div><span class="closing-title text-sm font-semibold text-gray-800 transition">Retail Sales Assistant</span><span class="closing-company text-sm text-gray-400 ml-2 transition">Naivas</span></div><span class="text-xs font-medium text-red-600">8 days</span></li>
+          </ul>
+          <div class="mt-6 pt-2 flex justify-center">
+            <a href="#" class="text-sm font-medium text-gray-400 hover:text-emerald-600 transition inline-flex items-center gap-1.5">View all urgent deadlines <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg></a>
+          </div>
+        </div>
+        <div class="lg:col-span-1 space-y-6">
+          <div class="bg-white/80 backdrop-blur-sm rounded-xl p-6 border border-emerald-100/60 shadow-sm">
+            <div class="text-4xl mb-3">📄</div>
+            <h3 class="text-xl font-extrabold text-gray-800">Professional CV & Cover Letter</h3>
+            <p class="text-sm text-gray-600 mt-2 leading-relaxed">Stand out to Kenyan employers with a professionally written CV and cover letter tailored to your industry.</p>
+            <ul class="mt-4 space-y-2 text-sm text-gray-600">
+              <li class="flex items-center gap-2"><span class="text-emerald-600 font-bold">✓</span> ATS-friendly formatting</li>
+              <li class="flex items-center gap-2"><span class="text-emerald-600 font-bold">✓</span> Industry-specific keywords</li>
+              <li class="flex items-center gap-2"><span class="text-emerald-600 font-bold">✓</span> Cover letter included</li>
+            </ul>
+            <div class="mt-4 flex items-baseline gap-1"><span class="text-sm font-medium text-gray-500">From</span><span class="text-2xl font-extrabold text-emerald-600">KSh 1,500</span></div>
+            <a href="#" class="mt-4 inline-block w-full text-center bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-6 rounded-lg transition shadow-md shadow-emerald-200">Improve My CV →</a>
+            <p class="mt-3 text-xs text-gray-400 text-center">100% satisfaction guarantee</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- 4. BROWSE BY CATEGORY (Horizontal scroll with arrows)        -->
+  <!-- ============================================================ -->
+  <section class="section-bg py-10 border-t border-gray-200/50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between mb-6">
+        <div>
+          <h2 class="text-2xl font-extrabold text-gray-800">Browse by Category</h2>
+          <p class="text-sm text-gray-500 font-light">Explore opportunities based on your field, interests, and experience.</p>
+        </div>
+        <a href="#" class="text-sm font-semibold text-emerald-600 hover:text-emerald-700 transition whitespace-nowrap ml-4">View All Categories →</a>
+      </div>
+
+      <div class="relative flex items-center">
+        <button id="scroll-left-cat" class="scroll-btn absolute left-0 ml-1 z-10 hidden md:flex">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-5 h-5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+          </svg>
+        </button>
+
+        <div id="categories-scroll" class="flex flex-nowrap gap-4 overflow-x-auto no-scrollbar py-4 px-8 sm:px-10 w-full">
+          <a href="#" class="category-item flex-shrink-0 w-[160px] sm:w-[170px] bg-white/70 backdrop-blur-sm rounded-xl p-4 text-center border border-white/60 hover:border-emerald-400 transition">
+            <div class="cat-icon text-4xl mb-2">💻</div>
+            <p class="text-sm font-semibold text-gray-800">IT & Software</p>
+            <span class="text-xs text-gray-400">124 jobs</span>
+          </a>
+          <a href="#" class="category-item flex-shrink-0 w-[160px] sm:w-[170px] bg-white/70 backdrop-blur-sm rounded-xl p-4 text-center border border-white/60 hover:border-emerald-400 transition">
+            <div class="cat-icon text-4xl mb-2">🏥</div>
+            <p class="text-sm font-semibold text-gray-800">Health & Medical</p>
+            <span class="text-xs text-gray-400">87 jobs</span>
+          </a>
+          <a href="#" class="category-item flex-shrink-0 w-[160px] sm:w-[170px] bg-white/70 backdrop-blur-sm rounded-xl p-4 text-center border border-white/60 hover:border-emerald-400 transition">
+            <div class="cat-icon text-4xl mb-2">📊</div>
+            <p class="text-sm font-semibold text-gray-800">Finance & Accounting</p>
+            <span class="text-xs text-gray-400">63 jobs</span>
+          </a>
+          <a href="#" class="category-item flex-shrink-0 w-[160px] sm:w-[170px] bg-white/70 backdrop-blur-sm rounded-xl p-4 text-center border border-white/60 hover:border-emerald-400 transition">
+            <div class="cat-icon text-4xl mb-2">🏗️</div>
+            <p class="text-sm font-semibold text-gray-800">Engineering</p>
+            <span class="text-xs text-gray-400">52 jobs</span>
+          </a>
+          <a href="#" class="category-item flex-shrink-0 w-[160px] sm:w-[170px] bg-white/70 backdrop-blur-sm rounded-xl p-4 text-center border border-white/60 hover:border-emerald-400 transition">
+            <div class="cat-icon text-4xl mb-2">📚</div>
+            <p class="text-sm font-semibold text-gray-800">Education</p>
+            <span class="text-xs text-gray-400">41 jobs</span>
+          </a>
+          <a href="#" class="category-item flex-shrink-0 w-[160px] sm:w-[170px] bg-white/70 backdrop-blur-sm rounded-xl p-4 text-center border border-white/60 hover:border-emerald-400 transition">
+            <div class="cat-icon text-4xl mb-2">🏢</div>
+            <p class="text-sm font-semibold text-gray-800">Administration</p>
+            <span class="text-xs text-gray-400">38 jobs</span>
+          </a>
+          <a href="#" class="category-item flex-shrink-0 w-[160px] sm:w-[170px] bg-white/70 backdrop-blur-sm rounded-xl p-4 text-center border border-white/60 hover:border-emerald-400 transition">
+            <div class="cat-icon text-4xl mb-2">⚖️</div>
+            <p class="text-sm font-semibold text-gray-800">Legal</p>
+            <span class="text-xs text-gray-400">24 jobs</span>
+          </a>
+          <a href="#" class="category-item flex-shrink-0 w-[160px] sm:w-[170px] bg-white/70 backdrop-blur-sm rounded-xl p-4 text-center border border-white/60 hover:border-emerald-400 transition">
+            <div class="cat-icon text-4xl mb-2">🚛</div>
+            <p class="text-sm font-semibold text-gray-800">Logistics</p>
+            <span class="text-xs text-gray-400">19 jobs</span>
+          </a>
+          <a href="#" class="category-item flex-shrink-0 w-[160px] sm:w-[170px] bg-white/70 backdrop-blur-sm rounded-xl p-4 text-center border border-white/60 hover:border-emerald-400 transition">
+            <div class="cat-icon text-4xl mb-2">🎨</div>
+            <p class="text-sm font-semibold text-gray-800">Creative & Design</p>
+            <span class="text-xs text-gray-400">16 jobs</span>
+          </a>
+          <a href="#" class="category-item flex-shrink-0 w-[160px] sm:w-[170px] bg-white/70 backdrop-blur-sm rounded-xl p-4 text-center border border-white/60 hover:border-emerald-400 transition">
+            <div class="cat-icon text-4xl mb-2">🤝</div>
+            <p class="text-sm font-semibold text-gray-800">NGO & Social Work</p>
+            <span class="text-xs text-gray-400">28 jobs</span>
+          </a>
+        </div>
+
+        <button id="scroll-right-cat" class="scroll-btn absolute right-0 mr-1 z-10 hidden md:flex">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-5 h-5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+          </svg>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- 5. OPPORTUNITIES HUB (with Sample Posts)                     -->
+  <!-- ============================================================ -->
+  <section class="section-bg py-10 border-t border-gray-200/50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+      <div class="flex items-center justify-between mb-6">
+        <div>
+          <h2 class="text-2xl font-extrabold text-gray-800">🚀 Opportunities Hub</h2>
+          <p class="text-sm text-gray-500 font-light">Discover internships, scholarships, graduate programs, and career opportunities.</p>
+        </div>
+        <a href="#" class="text-sm font-semibold text-emerald-600 hover:text-emerald-700 transition whitespace-nowrap ml-4">View All →</a>
+      </div>
+
+      <div class="flex flex-wrap items-center gap-2 border-b border-gray-200/60 pb-3 mb-6">
+        <button data-tab="entry" class="tab-btn active px-5 py-2 text-sm font-semibold rounded-full shadow-sm">
+          Entry Level <span class="tab-count text-emerald-200">(4)</span>
+        </button>
+        <button data-tab="internships" class="tab-btn inactive px-5 py-2 text-sm font-semibold rounded-full">
+          Internships <span class="tab-count text-gray-400">(4)</span>
+        </button>
+        <button data-tab="scholarships" class="tab-btn inactive px-5 py-2 text-sm font-semibold rounded-full">
+          Scholarships <span class="tab-count text-gray-400">(4)</span>
+        </button>
+      </div>
+
+      <div>
+        <div id="entry" class="tab-content active">
+          <ul class="divide-y divide-gray-200/50 bg-white/40 backdrop-blur-sm rounded-xl border border-white/60 px-4">
+            <li class="py-3 flex flex-wrap items-center justify-between gap-2">
+              <div><span class="text-sm font-semibold text-gray-800">Graduate Trainee</span><span class="text-sm text-gray-400 ml-2">Safaricom · Nairobi</span></div>
+              <span class="text-xs text-gray-300">5d ago</span>
+            </li>
+            <li class="py-3 flex flex-wrap items-center justify-between gap-2">
+              <div><span class="text-sm font-semibold text-gray-800">Assistant Accountant</span><span class="text-sm text-gray-400 ml-2">KPMG · Nairobi</span></div>
+              <span class="text-xs text-gray-300">2d ago</span>
+            </li>
+            <li class="py-3 flex flex-wrap items-center justify-between gap-2">
+              <div><span class="text-sm font-semibold text-gray-800">Field Officer</span><span class="text-sm text-gray-400 ml-2">World Food Programme · Kisumu</span></div>
+              <span class="text-xs text-gray-300">1w ago</span>
+            </li>
+            <li class="py-3 flex flex-wrap items-center justify-between gap-2">
+              <div><span class="text-sm font-semibold text-gray-800">Sales Representative</span><span class="text-sm text-gray-400 ml-2">Twiga Foods · Mombasa</span></div>
+              <span class="text-xs text-gray-300">3d ago</span>
+            </li>
+          </ul>
+        </div>
+
+        <div id="internships" class="tab-content">
+          <ul class="divide-y divide-gray-200/50 bg-white/40 backdrop-blur-sm rounded-xl border border-white/60 px-4">
+            <li class="py-3 flex flex-wrap items-center justify-between gap-2">
+              <div><span class="text-sm font-semibold text-gray-800">Software Dev Intern</span><span class="text-sm text-gray-400 ml-2">Google · Remote</span></div>
+              <span class="text-xs text-gray-300">4d ago</span>
+            </li>
+            <li class="py-3 flex flex-wrap items-center justify-between gap-2">
+              <div><span class="text-sm font-semibold text-gray-800">Data Science Intern</span><span class="text-sm text-gray-400 ml-2">UN Habitat · Nairobi</span></div>
+              <span class="text-xs text-gray-300">1d ago</span>
+            </li>
+            <li class="py-3 flex flex-wrap items-center justify-between gap-2">
+              <div><span class="text-sm font-semibold text-gray-800">Audit Intern</span><span class="text-sm text-gray-400 ml-2">EY · Nairobi</span></div>
+              <span class="text-xs text-gray-300">2w ago</span>
+            </li>
+            <li class="py-3 flex flex-wrap items-center justify-between gap-2">
+              <div><span class="text-sm font-semibold text-gray-800">Communications Intern</span><span class="text-sm text-gray-400 ml-2">Red Cross · Nairobi</span></div>
+              <span class="text-xs text-gray-300">5d ago</span>
+            </li>
+          </ul>
+        </div>
+
+        <div id="scholarships" class="tab-content">
+          <ul class="divide-y divide-gray-200/50 bg-white/40 backdrop-blur-sm rounded-xl border border-white/60 px-4">
+            <li class="py-3 flex flex-wrap items-center justify-between gap-2">
+              <div><span class="text-sm font-semibold text-gray-800">Mastercard Foundation Scholars Program</span><span class="text-sm text-gray-400 ml-2">Full Tuition</span></div>
+              <span class="text-xs text-red-600 font-medium">Closes 15 Jun</span>
+            </li>
+            <li class="py-3 flex flex-wrap items-center justify-between gap-2">
+              <div><span class="text-sm font-semibold text-gray-800">DAAD Kenya Scholarships</span><span class="text-sm text-gray-400 ml-2">Partial Tuition</span></div>
+              <span class="text-xs text-red-600 font-medium">Closes 30 Jun</span>
+            </li>
+            <li class="py-3 flex flex-wrap items-center justify-between gap-2">
+              <div><span class="text-sm font-semibold text-gray-800">KCB Foundation Scholarships</span><span class="text-sm text-gray-400 ml-2">Full Tuition</span></div>
+              <span class="text-xs text-red-600 font-medium">Closes 10 Jul</span>
+            </li>
+            <li class="py-3 flex flex-wrap items-center justify-between gap-2">
+              <div><span class="text-sm font-semibold text-gray-800">Equity Group Wings to Fly</span><span class="text-sm text-gray-400 ml-2">Full Tuition</span></div>
+              <span class="text-xs text-red-600 font-medium">Closes 25 Jun</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- 6. GOVERNMENT JOBS (2‑COLUMN SPLIT)                          -->
+  <!-- ============================================================ -->
+  <section class="section-bg py-10 border-t border-gray-200/50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+      <div class="flex items-center justify-between mb-6">
+        <div>
+          <h2 class="text-2xl font-extrabold text-gray-800">🏛️ Public Sector Opportunities</h2>
+          <p class="text-sm text-gray-500 font-light">National and county government vacancies, internships, shortlisting updates, and recruitment notices.</p>
+        </div>
+        <a href="#" class="text-sm font-semibold text-emerald-600 hover:text-emerald-700 transition whitespace-nowrap ml-4">View All →</a>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+        <!-- National Government Column -->
+        <div class="bg-white/40 backdrop-blur-sm rounded-xl border border-white/60 overflow-hidden">
+          <div class="flex items-center gap-3 px-4 py-3 bg-blue-50/50 border-b border-blue-100/60">
+            <span class="gov-badge national">National</span>
+            <span class="text-sm font-semibold text-gray-800">Government of Kenya</span>
+          </div>
+          <ul class="divide-y divide-gray-200/50 px-4">
+            <li class="gov-item py-3 flex flex-wrap items-center justify-between gap-2">
+              <div>
+                <span class="gov-title text-sm font-semibold text-gray-800 transition">Tax Officer</span>
+                <span class="gov-org text-sm text-gray-400 ml-2 transition">KRA · Nairobi</span>
+              </div>
+              <span class="text-xs text-gray-300">Closes 30 Jun</span>
+            </li>
+            <li class="gov-item py-3 flex flex-wrap items-center justify-between gap-2">
+              <div>
+                <span class="gov-title text-sm font-semibold text-gray-800 transition">ICT Officer</span>
+                <span class="gov-org text-sm text-gray-400 ml-2 transition">ICT Authority · Nairobi</span>
+              </div>
+              <span class="text-xs text-gray-300">Closes 5 Jul</span>
+            </li>
+            <li class="gov-item py-3 flex flex-wrap items-center justify-between gap-2">
+              <div>
+                <span class="gov-title text-sm font-semibold text-gray-800 transition">Customs Officer</span>
+                <span class="gov-org text-sm text-gray-400 ml-2 transition">KRA · Mombasa</span>
+              </div>
+              <span class="text-xs text-gray-300">Closes 15 Jul</span>
+            </li>
+            <li class="gov-item py-3 flex flex-wrap items-center justify-between gap-2">
+              <div>
+                <span class="gov-title text-sm font-semibold text-gray-800 transition">Public Health Officer</span>
+                <span class="gov-org text-sm text-gray-400 ml-2 transition">MOH · Nairobi</span>
+              </div>
+              <span class="text-xs text-gray-300">Closes 20 Jul</span>
+            </li>
+          </ul>
+          <div class="px-4 py-2 border-t border-gray-200/50 bg-white/30">
+            <a href="#" class="text-xs font-semibold text-blue-600 hover:text-blue-800 transition inline-flex items-center gap-1">
+              View all national jobs <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
+            </a>
+          </div>
+        </div>
+
+        <!-- County Government Column -->
+        <div class="bg-white/40 backdrop-blur-sm rounded-xl border border-white/60 overflow-hidden">
+          <div class="flex items-center gap-3 px-4 py-3 bg-green-50/50 border-b border-green-100/60">
+            <span class="gov-badge county">County</span>
+            <span class="text-sm font-semibold text-gray-800">County Governments</span>
+          </div>
+          <ul class="divide-y divide-gray-200/50 px-4">
+            <li class="gov-item py-3 flex flex-wrap items-center justify-between gap-2">
+              <div>
+                <span class="gov-title text-sm font-semibold text-gray-800 transition">Agricultural Officer</span>
+                <span class="gov-org text-sm text-gray-400 ml-2 transition">County Gov. Nakuru</span>
+              </div>
+              <span class="text-xs text-gray-300">Closes 25 Jun</span>
+            </li>
+            <li class="gov-item py-3 flex flex-wrap items-center justify-between gap-2">
+              <div>
+                <span class="gov-title text-sm font-semibold text-gray-800 transition">Public Health Officer</span>
+                <span class="gov-org text-sm text-gray-400 ml-2 transition">County Gov. Mombasa</span>
+              </div>
+              <span class="text-xs text-gray-300">Closes 2 Jul</span>
+            </li>
+            <li class="gov-item py-3 flex flex-wrap items-center justify-between gap-2">
+              <div>
+                <span class="gov-title text-sm font-semibold text-gray-800 transition">Water Engineer</span>
+                <span class="gov-org text-sm text-gray-400 ml-2 transition">County Gov. Kisumu</span>
+              </div>
+              <span class="text-xs text-gray-300">Closes 10 Jul</span>
+            </li>
+            <li class="gov-item py-3 flex flex-wrap items-center justify-between gap-2">
+              <div>
+                <span class="gov-title text-sm font-semibold text-gray-800 transition">Community Development Officer</span>
+                <span class="gov-org text-sm text-gray-400 ml-2 transition">County Gov. Machakos</span>
+              </div>
+              <span class="text-xs text-gray-300">Closes 18 Jul</span>
+            </li>
+          </ul>
+          <div class="px-4 py-2 border-t border-gray-200/50 bg-white/30">
+            <a href="#" class="text-xs font-semibold text-emerald-600 hover:text-emerald-700 transition inline-flex items-center gap-1">
+              View all county jobs <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
+            </a>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- 7. JOB MATCHING PREMIUM (AI-POWERED)                         -->
+  <!-- ============================================================ -->
+  <section class="section-bg py-10 border-t border-gray-200/50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+      <div class="matching-card p-6 md:p-8 relative overflow-hidden">
+        <div class="absolute -top-12 -right-12 w-48 h-48 bg-emerald-200/30 rounded-full blur-3xl"></div>
+        <div class="absolute -bottom-12 -left-12 w-48 h-48 bg-teal-200/30 rounded-full blur-3xl"></div>
+
+        <div class="relative flex flex-col md:flex-row items-start md:items-center gap-6 md:gap-10">
+
+          <div class="flex-1">
+            <div class="flex items-center gap-3 mb-2">
+              <span class="text-3xl">🧠</span>
+              <span class="premium-badge">⭐ Premium</span>
+              <span class="highlight">AI-Powered</span>
+            </div>
+            <h2 class="text-2xl md:text-3xl font-extrabold text-gray-800">
+              Smart Job Matching
+            </h2>
+            <p class="text-sm text-gray-600 mt-1 max-w-xl leading-relaxed">
+              Upload your CV — our AI extracts your skills, experience, and preferences, then matches you to the most relevant jobs. No more endless scrolling.
+            </p>
+            <div class="mt-3 flex flex-wrap items-center gap-4">
+              <div class="feature-item"><span class="check">✓</span> CV parsing & skill extraction</div>
+              <div class="feature-item"><span class="check">✓</span> AI-powered job matching</div>
+              <div class="feature-item"><span class="check">✓</span> Real-time match scores</div>
+              <div class="feature-item"><span class="check">✓</span> Personalized job alerts</div>
+            </div>
+          </div>
+
+          <div class="flex flex-col items-start md:items-end gap-3 w-full md:w-auto">
+            <a href="#" class="cta-btn text-sm md:text-base w-full md:w-auto text-center">
+              Upload CV & Get Matched →
+            </a>
+            <p class="text-[10px] text-gray-400 text-center md:text-right">Free trial · No credit card required</p>
+
+            <div class="w-full md:w-64 mt-2 space-y-1.5">
+              <div class="match-result flex items-center justify-between">
+                <div>
+                  <span class="text-xs font-semibold text-gray-800">Senior Software Engineer</span>
+                  <span class="text-[10px] text-gray-400 ml-1">Safaricom</span>
+                </div>
+                <span class="match-score high">92% Match</span>
+              </div>
+              <div class="match-result flex items-center justify-between">
+                <div>
+                  <span class="text-xs font-semibold text-gray-800">Data Analyst</span>
+                  <span class="text-[10px] text-gray-400 ml-1">KRA</span>
+                </div>
+                <span class="match-score medium">78% Match</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- 8. MERGED: FLEXIBLE JOBS + OPPORTUNITIES ACROSS KENYA        -->
+  <!-- ============================================================ -->
+  <section class="section-bg py-10 border-t border-gray-200/50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+        <!-- ===== LEFT COLUMN: Flexible Jobs List ===== -->
+        <div class="lg:col-span-2">
+          <div class="flex items-center justify-between mb-6">
+            <div>
+              <h2 class="text-2xl font-extrabold text-gray-800">🧩 Flexible Work Opportunities</h2>
+              <p class="text-sm text-gray-500 font-light">Browse casual, temporary, freelance, and part-time jobs.</p>
+            </div>
+            <a href="#" class="text-sm font-semibold text-emerald-600 hover:text-emerald-700 transition whitespace-nowrap ml-4">Browse All →</a>
+          </div>
+
+          <!-- List View -->
+          <div class="bg-white/40 backdrop-blur-sm rounded-xl border border-white/60 divide-y divide-gray-200/50">
+            <!-- Item 1 -->
+            <div class="flex flex-wrap items-center justify-between py-4 px-5 hover:bg-emerald-50/30 transition rounded-t-xl">
+              <div class="flex items-center gap-3">
+                <span class="text-xl">🛍️</span>
+                <div>
+                  <h4 class="text-sm font-semibold text-gray-800">Retail Sales Assistant</h4>
+                  <p class="text-xs text-gray-500">Nairobi</p>
+                </div>
+              </div>
+              <div class="flex items-center gap-3 mt-1 sm:mt-0">
+                <span class="text-xs font-medium px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-700">Part-time</span>
+                <span class="text-sm font-medium text-gray-700">KSh 15k/mo</span>
+              </div>
+            </div>
+            <!-- Item 2 -->
+            <div class="flex flex-wrap items-center justify-between py-4 px-5 hover:bg-emerald-50/30 transition">
+              <div class="flex items-center gap-3">
+                <span class="text-xl">✍️</span>
+                <div>
+                  <h4 class="text-sm font-semibold text-gray-800">Freelance Writer</h4>
+                  <p class="text-xs text-gray-500">Remote</p>
+                </div>
+              </div>
+              <div class="flex items-center gap-3 mt-1 sm:mt-0">
+                <span class="text-xs font-medium px-2.5 py-0.5 rounded-full bg-purple-50 text-purple-700">Freelance</span>
+                <span class="text-sm font-medium text-gray-700">KSh 2k/article</span>
+              </div>
+            </div>
+            <!-- Item 3 -->
+            <div class="flex flex-wrap items-center justify-between py-4 px-5 hover:bg-emerald-50/30 transition">
+              <div class="flex items-center gap-3">
+                <span class="text-xl">🎪</span>
+                <div>
+                  <h4 class="text-sm font-semibold text-gray-800">Event Staff</h4>
+                  <p class="text-xs text-gray-500">Mombasa</p>
+                </div>
+              </div>
+              <div class="flex items-center gap-3 mt-1 sm:mt-0">
+                <span class="text-xs font-medium px-2.5 py-0.5 rounded-full bg-orange-50 text-orange-700">Casual</span>
+                <span class="text-sm font-medium text-gray-700">KSh 1.5k/day</span>
+              </div>
+            </div>
+            <!-- Item 4 -->
+            <div class="flex flex-wrap items-center justify-between py-4 px-5 hover:bg-emerald-50/30 transition rounded-b-xl">
+              <div class="flex items-center gap-3">
+                <span class="text-xl">📋</span>
+                <div>
+                  <h4 class="text-sm font-semibold text-gray-800">Temporary Admin</h4>
+                  <p class="text-xs text-gray-500">Kisumu</p>
+                </div>
+              </div>
+              <div class="flex items-center gap-3 mt-1 sm:mt-0">
+                <span class="text-xs font-medium px-2.5 py-0.5 rounded-full bg-yellow-50 text-yellow-700">Temporary</span>
+                <span class="text-sm font-medium text-gray-700">KSh 25k/mo</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ===== RIGHT COLUMN: Opportunities Across Kenya ===== -->
+        <div class="lg:col-span-1">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-extrabold text-gray-800 flex items-center gap-2">
+              <span>📍</span> Across Kenya
+            </h3>
+            <a href="#" class="text-xs font-semibold text-emerald-600 hover:text-emerald-700 transition">View All →</a>
+          </div>
+          <div class="bg-white/40 backdrop-blur-sm rounded-xl p-4 border border-white/60">
+            <div class="space-y-1">
+              <!-- Counties -->
+              <a href="#" class="location-item flex items-center justify-between p-2.5 rounded-lg transition">
+                <span class="loc-name text-sm font-medium text-gray-700 transition">Nairobi</span>
+                <span class="text-xs font-medium text-emerald-600 bg-emerald-100/60 px-2 py-0.5 rounded-full">234 jobs</span>
+              </a>
+              <a href="#" class="location-item flex items-center justify-between p-2.5 rounded-lg transition">
+                <span class="loc-name text-sm font-medium text-gray-700 transition">Mombasa</span>
+                <span class="text-xs font-medium text-emerald-600 bg-emerald-100/60 px-2 py-0.5 rounded-full">98 jobs</span>
+              </a>
+              <a href="#" class="location-item flex items-center justify-between p-2.5 rounded-lg transition">
+                <span class="loc-name text-sm font-medium text-gray-700 transition">Kisumu</span>
+                <span class="text-xs font-medium text-emerald-600 bg-emerald-100/60 px-2 py-0.5 rounded-full">76 jobs</span>
+              </a>
+              <a href="#" class="location-item flex items-center justify-between p-2.5 rounded-lg transition">
+                <span class="loc-name text-sm font-medium text-gray-700 transition">Nakuru</span>
+                <span class="text-xs font-medium text-emerald-600 bg-emerald-100/60 px-2 py-0.5 rounded-full">63 jobs</span>
+              </a>
+              <a href="#" class="location-item flex items-center justify-between p-2.5 rounded-lg transition">
+                <span class="loc-name text-sm font-medium text-gray-700 transition">Eldoret</span>
+                <span class="text-xs font-medium text-emerald-600 bg-emerald-100/60 px-2 py-0.5 rounded-full">52 jobs</span>
+              </a>
+              <a href="#" class="location-item flex items-center justify-between p-2.5 rounded-lg transition">
+                <span class="loc-name text-sm font-medium text-gray-700 transition">Thika</span>
+                <span class="text-xs font-medium text-emerald-600 bg-emerald-100/60 px-2 py-0.5 rounded-full">41 jobs</span>
+              </a>
+              <a href="#" class="location-item flex items-center justify-between p-2.5 rounded-lg transition">
+                <span class="loc-name text-sm font-medium text-gray-700 transition">Kakamega</span>
+                <span class="text-xs font-medium text-emerald-600 bg-emerald-100/60 px-2 py-0.5 rounded-full">29 jobs</span>
+              </a>
+              <a href="#" class="location-item flex items-center justify-between p-2.5 rounded-lg transition">
+                <span class="loc-name text-sm font-medium text-gray-700 transition">Machakos</span>
+                <span class="text-xs font-medium text-emerald-600 bg-emerald-100/60 px-2 py-0.5 rounded-full">33 jobs</span>
+              </a>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- 9. REDESIGNED: CAREER ADVICE & RESOURCES (Images + Sidebar)  -->
+  <!-- ============================================================ -->
+  <section class="section-bg py-10 border-t border-gray-200/50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+      <div class="flex items-center justify-between mb-6">
+        <div>
+          <h2 class="text-2xl font-extrabold text-gray-800">📖 Career Advice & Resources</h2>
+          <p class="text-sm text-gray-500 font-light">Practical guides to help you write better CVs, prepare for interviews, and negotiate salaries.</p>
+        </div>
+        <a href="#" class="text-sm font-semibold text-emerald-600 hover:text-emerald-700 transition whitespace-nowrap ml-4">Read All Articles →</a>
+      </div>
+
+      <!-- Main Grid: 2/3 Content + 1/3 Sidebar -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+        <!-- ===== MAIN CONTENT (Col-span-2) ===== -->
+        <div class="lg:col-span-2 space-y-6">
+
+          <!-- Featured Article (Big Image Card) -->
+          <a href="#" class="group relative overflow-hidden rounded-xl border border-white/60 hover:border-emerald-400 transition block">
+            <img
+              src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=800&h=400&fit=crop&crop=center"
+              alt="Team collaboration"
+              class="w-full h-64 md:h-72 object-cover"
+            />
+            <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
+            <div class="absolute bottom-0 left-0 p-6 md:p-8">
+              <span class="inline-block text-xs font-bold text-emerald-300 bg-black/30 px-3 py-1 rounded-full mb-3">⭐ Featured</span>
+              <h3 class="text-xl md:text-2xl font-extrabold text-white leading-snug group-hover:text-emerald-200 transition">
+                The Ultimate CV Checklist for 2026
+              </h3>
+              <p class="text-sm text-white/80 mt-2 max-w-md">From formatting to keywords – everything you need to get past ATS filters and land interviews.</p>
+              <div class="flex items-center gap-4 mt-4 text-xs text-white/60">
+                <span>📅 15 Jun 2026</span>
+                <span>⏱️ 8 min read</span>
+              </div>
+            </div>
+          </a>
+
+          <!-- 3 Small Article Cards (with images) -->
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <!-- Card 1 -->
+            <a href="#" class="group bg-white/40 backdrop-blur-sm rounded-xl overflow-hidden border border-white/60 hover:border-emerald-400 hover:bg-emerald-50/30 transition">
+              <img
+                src="https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=400&h=200&fit=crop&crop=center"
+                alt="Writing"
+                class="w-full h-32 object-cover"
+              />
+              <div class="p-4">
+                <span class="text-[10px] font-bold text-blue-600 uppercase tracking-wide">Writing Tips</span>
+                <h4 class="text-sm font-semibold text-gray-800 group-hover:text-emerald-600 transition">Cover Letter Secrets</h4>
+                <p class="text-xs text-gray-500 mt-0.5">How to make yours stand out.</p>
+                <span class="text-[10px] text-gray-400">5 min read</span>
+              </div>
+            </a>
+            <!-- Card 2 -->
+            <a href="#" class="group bg-white/40 backdrop-blur-sm rounded-xl overflow-hidden border border-white/60 hover:border-emerald-400 hover:bg-emerald-50/30 transition">
+              <img
+                src="https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=400&h=200&fit=crop&crop=center"
+                alt="Interview"
+                class="w-full h-32 object-cover"
+              />
+              <div class="p-4">
+                <span class="text-[10px] font-bold text-purple-600 uppercase tracking-wide">Interview Tips</span>
+                <h4 class="text-sm font-semibold text-gray-800 group-hover:text-emerald-600 transition">Ace Your Virtual Interview</h4>
+                <p class="text-xs text-gray-500 mt-0.5">Prepare with confidence.</p>
+                <span class="text-[10px] text-gray-400">4 min read</span>
+              </div>
+            </a>
+            <!-- Card 3 -->
+            <a href="#" class="group bg-white/40 backdrop-blur-sm rounded-xl overflow-hidden border border-white/60 hover:border-emerald-400 hover:bg-emerald-50/30 transition">
+              <img
+                src="https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=400&h=200&fit=crop&crop=center"
+                alt="Negotiation"
+                class="w-full h-32 object-cover"
+              />
+              <div class="p-4">
+                <span class="text-[10px] font-bold text-amber-600 uppercase tracking-wide">Salary Guide</span>
+                <h4 class="text-sm font-semibold text-gray-800 group-hover:text-emerald-600 transition">Salary Negotiation in Kenya</h4>
+                <p class="text-xs text-gray-500 mt-0.5">Tactics that work.</p>
+                <span class="text-[10px] text-gray-400">6 min read</span>
+              </div>
+            </a>
+          </div>
+
+          <!-- Optional "Load More" or "View All" link -->
+          <div class="text-center mt-4">
+            <a href="#" class="text-sm font-medium text-emerald-600 hover:text-emerald-700 transition inline-flex items-center gap-1.5">
+              View all articles
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+            </a>
+          </div>
+
+        </div>
+
+        <!-- ===== SIDEBAR (Col-span-1) ===== -->
+        <div class="lg:col-span-1 space-y-6">
+
+          <!-- Trending Topics Widget (Sticky removed) -->
+          <div class="bg-white/50 backdrop-blur-sm rounded-xl p-6 border border-white/60 shadow-sm">
+            <h4 class="text-sm font-bold text-gray-700 uppercase tracking-wider flex items-center gap-2 border-b border-gray-200/60 pb-3 mb-4">
+              <span>🔥</span> Trending Topics
+            </h4>
+            <ul class="space-y-3">
+              <li><a href="#" class="flex items-center justify-between text-sm text-gray-700 hover:text-emerald-600 transition group p-2 rounded-lg hover:bg-emerald-50/50"><span>CV Writing Tips</span><span class="text-xs text-gray-400 group-hover:text-emerald-600">→</span></a></li>
+              <li><a href="#" class="flex items-center justify-between text-sm text-gray-700 hover:text-emerald-600 transition group p-2 rounded-lg hover:bg-emerald-50/50"><span>Interview Questions</span><span class="text-xs text-gray-400 group-hover:text-emerald-600">→</span></a></li>
+              <li><a href="#" class="flex items-center justify-between text-sm text-gray-700 hover:text-emerald-600 transition group p-2 rounded-lg hover:bg-emerald-50/50"><span>Salary Trends 2026</span><span class="text-xs text-gray-400 group-hover:text-emerald-600">→</span></a></li>
+              <li><a href="#" class="flex items-center justify-between text-sm text-gray-700 hover:text-emerald-600 transition group p-2 rounded-lg hover:bg-emerald-50/50"><span>Remote Work Guide</span><span class="text-xs text-gray-400 group-hover:text-emerald-600">→</span></a></li>
+              <li><a href="#" class="flex items-center justify-between text-sm text-gray-700 hover:text-emerald-600 transition group p-2 rounded-lg hover:bg-emerald-50/50"><span>Reskilling for 2026</span><span class="text-xs text-gray-400 group-hover:text-emerald-600">→</span></a></li>
+            </ul>
+
+            <!-- Mini CTA inside sidebar -->
+            <div class="mt-6 pt-4 border-t border-gray-200/60">
+              <div class="bg-gradient-to-br from-emerald-50 to-teal-50/70 rounded-lg p-4 text-center">
+                <p class="text-xs font-semibold text-gray-600">Get weekly career tips</p>
+                <button class="mt-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-4 py-1.5 rounded-full transition">Subscribe →</button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- 10. NEWSLETTER SUBSCRIPTION                                  -->
+  <!-- ============================================================ -->
+  <section class="section-bg py-12 border-t border-gray-200/50">
+    <div class="max-w-2xl mx-auto px-4 text-center">
+      <h2 class="text-2xl font-extrabold text-gray-800">📬 Never Miss an Opportunity</h2>
+      <p class="text-sm text-gray-500 mt-1">Get new jobs, deadlines, and career opportunities delivered directly to your inbox.</p>
+      <form class="mt-6 flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
+        <input type="email" placeholder="Your email address" class="flex-1 px-4 py-3 rounded-lg border border-gray-300 bg-white/70 text-sm focus:outline-none focus:border-emerald-600" />
+        <button class="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-6 py-3 rounded-lg transition">Subscribe Free</button>
+      </form>
+      <p class="text-xs text-gray-400 mt-3">No spam, unsubscribe anytime.</p>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- 11. GOOGLE AD – BOTTOM LEADERBOARD                          -->
+  <!-- ============================================================ -->
+  <div class="section-bg pb-6">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="bg-gray-100 rounded-xl flex items-center justify-center h-20 md:h-24 border border-gray-200 text-gray-400 text-sm">📢 Google Ad – 728x90 (Bottom Leaderboard)</div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- 12. FOOTER                                                   -->
+  <!-- ============================================================ -->
+  <footer class="bg-gray-900 text-white py-10">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+        <div>
+          <span class="text-2xl font-bold text-emerald-400">JobBoard</span>
+          <p class="mt-2 text-sm text-gray-400">Helping Kenyans discover verified jobs, internships, and opportunities every day.</p>
+        </div>
+        <div>
+          <h4 class="font-semibold text-white">Jobs</h4>
+          <ul class="mt-2 space-y-1 text-sm text-gray-400">
+            <li><a href="#" class="hover:text-white transition">Browse Jobs</a></li>
+            <li><a href="#" class="hover:text-white transition">Government Jobs</a></li>
+            <li><a href="#" class="hover:text-white transition">Internships</a></li>
+            <li><a href="#" class="hover:text-white transition">Casual & Part-time</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4 class="font-semibold text-white">Resources</h4>
+          <ul class="mt-2 space-y-1 text-sm text-gray-400">
+            <li><a href="#" class="hover:text-white transition">Career Advice</a></li>
+            <li><a href="#" class="hover:text-white transition">CV Writing</a></li>
+            <li><a href="#" class="hover:text-white transition">Interview Tips</a></li>
+            <li><a href="#" class="hover:text-white transition">Salary Guide</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4 class="font-semibold text-white">Company</h4>
+          <ul class="mt-2 space-y-1 text-sm text-gray-400">
+            <li><a href="#" class="hover:text-white transition">About</a></li>
+            <li><a href="#" class="hover:text-white transition">Contact</a></li>
+            <li><a href="#" class="hover:text-white transition">Privacy Policy</a></li>
+            <li><a href="#" class="hover:text-white transition">Terms</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="border-t border-gray-800 mt-8 pt-6 text-center text-sm text-gray-500">
+        &copy; 2026 JobBoard Kenya. All rights reserved.
+      </div>
+    </div>
+  </footer>
+
+  <!-- ============================================================ -->
+  <!-- 13. JAVASCRIPT FOR TABS & SCROLL CONTAINERS                  -->
+  <!-- ============================================================ -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // ----- TABS -----
+      const tabs = document.querySelectorAll('.tab-btn');
+      const contents = {
+        entry: document.getElementById('entry'),
+        internships: document.getElementById('internships'),
+        scholarships: document.getElementById('scholarships')
+      };
+
+      tabs.forEach(tab => {
+        tab.addEventListener('click', function() {
+          tabs.forEach(t => {
+            t.classList.remove('active');
+            t.classList.add('inactive');
+            const count = t.querySelector('.tab-count');
+            if (count) count.className = 'tab-count text-gray-400';
+          });
+          this.classList.remove('inactive');
+          this.classList.add('active');
+          const count = this.querySelector('.tab-count');
+          if (count) count.className = 'tab-count text-emerald-200';
+          Object.values(contents).forEach(content => content.classList.remove('active'));
+          const tabId = this.getAttribute('data-tab');
+          if (contents[tabId]) contents[tabId].classList.add('active');
+        });
+      });
+
+      // ----- HELPER FUNCTION FOR SCROLL CONTAINERS -----
+      function setupScroll(containerId, leftBtnId, rightBtnId, scrollAmount = 300) {
+        const container = document.getElementById(containerId);
+        const leftBtn = document.getElementById(leftBtnId);
+        const rightBtn = document.getElementById(rightBtnId);
+
+        if (!container || !leftBtn || !rightBtn) return;
+
+        function updateButtons() {
+          const maxScroll = container.scrollWidth - container.clientWidth;
+          if (container.scrollLeft <= 0) {
+            leftBtn.classList.add('disabled');
+          } else {
+            leftBtn.classList.remove('disabled');
+          }
+          if (container.scrollLeft >= maxScroll - 1) {
+            rightBtn.classList.add('disabled');
+          } else {
+            rightBtn.classList.remove('disabled');
+          }
+        }
+
+        leftBtn.addEventListener('click', () => {
+          container.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+        });
+        rightBtn.addEventListener('click', () => {
+          container.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+        });
+        container.addEventListener('scroll', updateButtons);
+        window.addEventListener('resize', updateButtons);
+        updateButtons();
+      }
+
+      // Setup Categories Scroll
+      setupScroll('categories-scroll', 'scroll-left-cat', 'scroll-right-cat', 300);
+    });
+  </script>
+
+</body>
+</html>
+
+
+Job listing page
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>JobBoard Kenya – Job Listings</title>
+
+  <!-- Font: Nunito -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700;800&display=swap" rel="stylesheet" />
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { font-family: 'Nunito', sans-serif; margin: 0; padding: 0; background: #faf9f6; }
+    .section-bg { background: #faf9f6; }
+
+    /* Job card hover */
+    .job-card {
+      transition: all 0.15s ease;
+    }
+    .job-card:hover {
+      border-color: #15803d;
+      background: #ecfdf5;
+    }
+    .job-card:hover .job-title {
+      color: #15803d;
+    }
+
+    /* Filter chip */
+    .filter-chip {
+      transition: all 0.15s ease;
+      cursor: default;
+    }
+    .filter-chip.active {
+      background: #15803d;
+      color: white;
+      border-color: #15803d;
+    }
+    .filter-chip.active:hover {
+      background: #166534;
+    }
+    .filter-chip.inactive {
+      background: transparent;
+      color: #6b7280;
+      border-color: #e5e7eb;
+    }
+    .filter-chip.inactive:hover {
+      background: #f3f4f6;
+      color: #374151;
+    }
+
+    /* Pagination */
+    .page-btn {
+      transition: all 0.15s ease;
+    }
+    .page-btn.active {
+      background: #15803d;
+      color: white;
+      border-color: #15803d;
+    }
+    .page-btn.inactive {
+      background: transparent;
+      color: #6b7280;
+      border-color: #e5e7eb;
+    }
+    .page-btn.inactive:hover {
+      background: #f3f4f6;
+      color: #374151;
+    }
+
+    /* Category sidebar styles */
+    .category-group {
+      cursor: default;
+    }
+    .category-toggle {
+      cursor: pointer;
+      user-select: none;
+    }
+    .category-toggle .arrow {
+      transition: transform 0.2s ease;
+      display: inline-block;
+    }
+    .category-toggle.open .arrow {
+      transform: rotate(90deg);
+    }
+    .sub-category-list {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease, opacity 0.3s ease;
+      opacity: 0;
+    }
+    .sub-category-list.open {
+      max-height: 300px;
+      opacity: 1;
+    }
+
+    /* Hide scrollbar */
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+    /* Scroll buttons */
+    .scroll-btn {
+      background: white;
+      border: 1px solid #e5e7eb;
+      border-radius: 9999px;
+      width: 44px;
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      transition: all 0.2s ease;
+      z-index: 20;
+      color: #374151;
+    }
+    .scroll-btn:hover {
+      background: #ecfdf5;
+      border-color: #15803d;
+      color: #15803d;
+    }
+    .scroll-btn.disabled {
+      opacity: 0.3;
+      pointer-events: none;
+    }
+
+    /* Results per page select */
+    #per-page {
+      background: white;
+      border: 1px solid #e5e7eb;
+      border-radius: 0.5rem;
+      padding: 0.25rem 0.5rem;
+      font-size: 0.875rem;
+      color: #374151;
+      cursor: pointer;
+    }
+    #per-page:focus {
+      outline: none;
+      border-color: #15803d;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ============================================================ -->
+  <!-- HEADER (matching homepage)                                    -->
+  <!-- ============================================================ -->
+  <header class="bg-white/80 backdrop-blur-sm sticky top-0 z-50 border-b border-gray-200/50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16">
+      <div class="flex items-center gap-2">
+        <span class="text-2xl font-extrabold text-emerald-600">JobBoard</span>
+        <span class="text-[10px] font-bold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full uppercase">KE</span>
+      </div>
+      <nav class="hidden md:flex items-center gap-6 text-sm font-medium text-gray-700">
+        <a href="#" class="hover:text-emerald-600">Browse</a>
+        <a href="#" class="hover:text-emerald-600">Government</a>
+        <a href="#" class="hover:text-emerald-600">Internships</a>
+        <a href="#" class="hover:text-emerald-600">Resources</a>
+      </nav>
+      <div class="flex items-center gap-3">
+        <a href="#" class="hidden sm:inline-block text-sm font-medium text-emerald-600 border border-emerald-600 px-4 py-1.5 rounded-full hover:bg-emerald-50 transition">Post a Job</a>
+        <a href="#" class="bg-emerald-600 text-white px-4 py-1.5 rounded-full text-sm font-medium hover:bg-emerald-700 transition">Upload CV</a>
+        <button id="menu-toggle" class="md:hidden p-2 rounded-md text-gray-700 hover:bg-gray-100">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ============================================================ -->
+  <!-- JOB LISTINGS PAGE                                            -->
+  <!-- ============================================================ -->
+  <main>
+
+    <!-- ===== TOP BAR: Search + Filters ===== -->
+    <section class="section-bg py-8 border-b border-gray-200/50">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+          <!-- Left: Title + Result Count -->
+          <div>
+            <h1 class="text-2xl font-extrabold text-gray-800">Browse Jobs</h1>
+            <p class="text-sm text-gray-500">Showing <span class="font-semibold text-emerald-600">46</span> opportunities</p>
+          </div>
+          <!-- Right: Search Bar -->
+          <div class="flex flex-col sm:flex-row items-stretch gap-3 w-full md:w-auto">
+            <div class="relative flex-1 md:w-72">
+              <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+              <input type="text" placeholder="Search jobs, companies, or keywords" class="w-full pl-9 pr-4 py-2.5 rounded-lg border border-gray-300 bg-white/70 text-sm focus:outline-none focus:border-emerald-600" />
+            </div>
+            <button class="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-6 py-2.5 rounded-lg whitespace-nowrap text-sm transition">
+              Search
+            </button>
+          </div>
+        </div>
+
+        <!-- Filter Chips -->
+        <div class="flex flex-wrap items-center gap-2 mt-4">
+          <span class="text-xs font-medium text-gray-400 uppercase tracking-wider mr-1">Filters:</span>
+          <button class="filter-chip active px-4 py-1.5 rounded-full border text-sm font-medium">All Jobs</button>
+          <button class="filter-chip inactive px-4 py-1.5 rounded-full border text-sm font-medium">Full-time</button>
+          <button class="filter-chip inactive px-4 py-1.5 rounded-full border text-sm font-medium">Part-time</button>
+          <button class="filter-chip inactive px-4 py-1.5 rounded-full border text-sm font-medium">Contract</button>
+          <button class="filter-chip inactive px-4 py-1.5 rounded-full border text-sm font-medium">Internship</button>
+          <button class="filter-chip inactive px-4 py-1.5 rounded-full border text-sm font-medium">Remote</button>
+          <button class="filter-chip inactive px-4 py-1.5 rounded-full border text-sm font-medium">Government</button>
+          <select class="ml-2 px-3 py-1.5 rounded-full border border-gray-300 bg-white/70 text-sm focus:outline-none focus:border-emerald-600">
+            <option>Sort by: Relevance</option>
+            <option>Sort by: Newest</option>
+            <option>Sort by: Deadline</option>
+            <option>Sort by: Salary</option>
+          </select>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== MAIN GRID: Job Cards + Sidebar ===== -->
+    <section class="section-bg py-10">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+          <!-- ===== LEFT: Job Cards (col-span-2) ===== -->
+          <div class="lg:col-span-2 space-y-4">
+
+            <!-- Job Card 1 (with AI Match Score) -->
+            <a href="#" class="job-card block bg-white/70 backdrop-blur-sm rounded-xl p-5 border border-white/60 transition">
+              <div class="flex flex-wrap items-start justify-between gap-3">
+                <div>
+                  <h3 class="job-title text-lg font-extrabold text-gray-800 transition">Senior Software Engineer</h3>
+                  <p class="text-sm text-gray-500 flex items-center gap-2 mt-0.5">
+                    <span class="font-medium text-gray-700">Safaricom</span>
+                    <span class="text-gray-300">•</span>
+                    <span>Nairobi</span>
+                  </p>
+                </div>
+                <div class="flex flex-wrap items-center gap-2">
+                  <span class="text-xs font-medium text-emerald-700 bg-emerald-100/70 px-2.5 py-1 rounded-full flex items-center gap-1">
+                    <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full"></span> 92% Match
+                  </span>
+                  <span class="text-xs font-medium text-green-600 bg-green-50 px-2.5 py-1 rounded-full">Full-time</span>
+                </div>
+              </div>
+              <p class="text-sm text-gray-500 mt-2 line-clamp-2">We're looking for a passionate Senior Software Engineer to join our fintech team in Nairobi. Experience with Node.js and React required.</p>
+              <div class="flex flex-wrap items-center gap-4 mt-3 text-xs text-gray-400">
+                <span>💰 KSh 60k – 80k</span>
+                <span>•</span>
+                <span>📅 Posted 2h ago</span>
+                <span>•</span>
+                <span>⏳ Closes 30 Jun</span>
+              </div>
+            </a>
+
+            <!-- Job Card 2 (with AI Match Score) -->
+            <a href="#" class="job-card block bg-white/70 backdrop-blur-sm rounded-xl p-5 border border-white/60 transition">
+              <div class="flex flex-wrap items-start justify-between gap-3">
+                <div>
+                  <h3 class="job-title text-lg font-extrabold text-gray-800 transition">Public Health Officer</h3>
+                  <p class="text-sm text-gray-500 flex items-center gap-2 mt-0.5">
+                    <span class="font-medium text-gray-700">County Gov. Mombasa</span>
+                    <span class="text-gray-300">•</span>
+                    <span>Mombasa</span>
+                  </p>
+                </div>
+                <div class="flex flex-wrap items-center gap-2">
+                  <span class="text-xs font-medium text-emerald-700 bg-emerald-100/70 px-2.5 py-1 rounded-full flex items-center gap-1">
+                    <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full"></span> 78% Match
+                  </span>
+                  <span class="text-xs font-medium text-orange-600 bg-orange-50 px-2.5 py-1 rounded-full">Contract</span>
+                </div>
+              </div>
+              <p class="text-sm text-gray-500 mt-2 line-clamp-2">The County Government of Mombasa is seeking a qualified Public Health Officer to oversee disease prevention and community health programs.</p>
+              <div class="flex flex-wrap items-center gap-4 mt-3 text-xs text-gray-400">
+                <span>💰 KSh 45k – 55k</span>
+                <span>•</span>
+                <span>📅 Posted 4h ago</span>
+                <span>•</span>
+                <span>⏳ Closes 5 Jul</span>
+              </div>
+            </a>
+
+            <!-- Job Card 3 -->
+            <a href="#" class="job-card block bg-white/70 backdrop-blur-sm rounded-xl p-5 border border-white/60 transition">
+              <div class="flex flex-wrap items-start justify-between gap-3">
+                <div>
+                  <h3 class="job-title text-lg font-extrabold text-gray-800 transition">IT Support Intern</h3>
+                  <p class="text-sm text-gray-500 flex items-center gap-2 mt-0.5">
+                    <span class="font-medium text-gray-700">Equity Bank</span>
+                    <span class="text-gray-300">•</span>
+                    <span>Kisumu</span>
+                  </p>
+                </div>
+                <span class="text-xs font-medium text-purple-600 bg-purple-50 px-2.5 py-1 rounded-full">Internship</span>
+              </div>
+              <p class="text-sm text-gray-500 mt-2 line-clamp-2">Equity Bank is looking for a motivated IT Support Intern to join our Kisumu office. Great opportunity to learn and grow in a dynamic environment.</p>
+              <div class="flex flex-wrap items-center gap-4 mt-3 text-xs text-gray-400">
+                <span>💰 Stipend</span>
+                <span>•</span>
+                <span>📅 Posted 1d ago</span>
+                <span>•</span>
+                <span>⏳ Closes 10 Jul</span>
+              </div>
+            </a>
+
+            <!-- Job Card 4 -->
+            <a href="#" class="job-card block bg-white/70 backdrop-blur-sm rounded-xl p-5 border border-white/60 transition">
+              <div class="flex flex-wrap items-start justify-between gap-3">
+                <div>
+                  <h3 class="job-title text-lg font-extrabold text-gray-800 transition">Project Coordinator</h3>
+                  <p class="text-sm text-gray-500 flex items-center gap-2 mt-0.5">
+                    <span class="font-medium text-gray-700">UNICEF</span>
+                    <span class="text-gray-300">•</span>
+                    <span>Nairobi</span>
+                  </p>
+                </div>
+                <span class="text-xs font-medium text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full">Full-time</span>
+              </div>
+              <p class="text-sm text-gray-500 mt-2 line-clamp-2">UNICEF is looking for a Project Coordinator to manage child welfare initiatives across Nairobi. Strong organizational and communication skills required.</p>
+              <div class="flex flex-wrap items-center gap-4 mt-3 text-xs text-gray-400">
+                <span>💰 KSh 70k</span>
+                <span>•</span>
+                <span>📅 Posted 2d ago</span>
+                <span>•</span>
+                <span>⏳ Closes 15 Jul</span>
+              </div>
+            </a>
+
+            <!-- Job Card 5 -->
+            <a href="#" class="job-card block bg-white/70 backdrop-blur-sm rounded-xl p-5 border border-white/60 transition">
+              <div class="flex flex-wrap items-start justify-between gap-3">
+                <div>
+                  <h3 class="job-title text-lg font-extrabold text-gray-800 transition">Retail Sales Assistant</h3>
+                  <p class="text-sm text-gray-500 flex items-center gap-2 mt-0.5">
+                    <span class="font-medium text-gray-700">Naivas</span>
+                    <span class="text-gray-300">•</span>
+                    <span>Nairobi</span>
+                  </p>
+                </div>
+                <span class="text-xs font-medium text-blue-600 bg-blue-50 px-2.5 py-1 rounded-full">Part-time</span>
+              </div>
+              <p class="text-sm text-gray-500 mt-2 line-clamp-2">Naivas is hiring a part-time Retail Sales Assistant for our Nairobi branch. Customer service experience is a plus.</p>
+              <div class="flex flex-wrap items-center gap-4 mt-3 text-xs text-gray-400">
+                <span>💰 KSh 15k/mo</span>
+                <span>•</span>
+                <span>📅 Posted 3h ago</span>
+                <span>•</span>
+                <span>⏳ Closes 20 Jul</span>
+              </div>
+            </a>
+
+            <!-- Job Card 6 -->
+            <a href="#" class="job-card block bg-white/70 backdrop-blur-sm rounded-xl p-5 border border-white/60 transition">
+              <div class="flex flex-wrap items-start justify-between gap-3">
+                <div>
+                  <h3 class="job-title text-lg font-extrabold text-gray-800 transition">Tax Officer</h3>
+                  <p class="text-sm text-gray-500 flex items-center gap-2 mt-0.5">
+                    <span class="font-medium text-gray-700">KRA</span>
+                    <span class="text-gray-300">•</span>
+                    <span>Nairobi</span>
+                  </p>
+                </div>
+                <span class="text-xs font-medium text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full">Full-time</span>
+              </div>
+              <p class="text-sm text-gray-500 mt-2 line-clamp-2">The Kenya Revenue Authority is looking for qualified Tax Officers to join our team in Nairobi. Accounting or finance background required.</p>
+              <div class="flex flex-wrap items-center gap-4 mt-3 text-xs text-gray-400">
+                <span>💰 KSh 55k</span>
+                <span>•</span>
+                <span>📅 Posted 5d ago</span>
+                <span>•</span>
+                <span>⏳ Closes 30 Jun</span>
+              </div>
+            </a>
+
+            <!-- ===== PAGINATION ===== -->
+            <div class="flex flex-wrap items-center justify-between gap-4 pt-4 border-t border-gray-200/50">
+              <div class="flex flex-wrap items-center gap-4">
+                <p class="text-sm text-gray-500">Showing <span class="font-medium text-gray-700">1-20</span> of <span class="font-medium text-gray-700">46</span> jobs</p>
+                <div class="flex items-center gap-2">
+                  <label for="per-page" class="text-sm text-gray-500">Show:</label>
+                  <select id="per-page" class="px-2 py-1.5 rounded-lg border border-gray-300 bg-white/70 text-sm focus:outline-none focus:border-emerald-600">
+                    <option value="20" selected>20</option>
+                    <option value="30">30</option>
+                    <option value="40">40</option>
+                    <option value="50">50</option>
+                  </select>
+                </div>
+              </div>
+              <div class="flex items-center gap-2">
+                <button class="page-btn inactive px-3 py-1.5 rounded-lg border text-sm font-medium">←</button>
+                <button class="page-btn active px-3 py-1.5 rounded-lg border text-sm font-medium">1</button>
+                <button class="page-btn inactive px-3 py-1.5 rounded-lg border text-sm font-medium">2</button>
+                <button class="page-btn inactive px-3 py-1.5 rounded-lg border text-sm font-medium">3</button>
+                <span class="text-sm text-gray-400">…</span>
+                <button class="page-btn inactive px-3 py-1.5 rounded-lg border text-sm font-medium">8</button>
+                <button class="page-btn inactive px-3 py-1.5 rounded-lg border text-sm font-medium">→</button>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- ===== SIDEBAR (col-span-1) ===== -->
+          <div class="lg:col-span-1 space-y-6">
+
+            <!-- 1. Smart Job Matching (Premium) -->
+            <div class="bg-gradient-to-br from-emerald-50 to-teal-50/80 rounded-xl p-5 border border-emerald-200/60 shadow-sm">
+              <div class="flex items-center gap-2">
+                <span class="text-xl">🧠</span>
+                <span class="text-xs font-bold text-emerald-700 bg-emerald-100/70 px-2.5 py-0.5 rounded-full">Premium</span>
+              </div>
+              <h4 class="text-base font-extrabold text-gray-800 mt-1">Smart Job Matching</h4>
+              <p class="text-sm text-gray-600 mt-1 leading-relaxed">Upload your CV and let our AI find the perfect roles for you, tailored to your skills and experience.</p>
+              <a href="#" class="mt-3 w-full text-center bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 px-4 rounded-lg transition shadow-md shadow-emerald-200 flex items-center justify-center gap-2 text-sm">
+                Upload CV & Get Matched →
+              </a>
+            </div>
+
+            <!-- 2. Google Ad (NEW) -->
+            <div class="bg-gray-100 rounded-xl flex items-center justify-center h-64 border border-gray-200 text-gray-400 text-sm">
+              <div class="text-center">
+                <div>📢 Google Ad</div>
+                <div class="text-xs">(300x250)</div>
+              </div>
+            </div>
+
+            <!-- 3. Browse by Category (with Sub-Categories) -->
+            <div class="bg-white/50 backdrop-blur-sm rounded-xl p-5 border border-white/60">
+              <h4 class="text-sm font-bold text-gray-700 uppercase tracking-wider border-b border-gray-200/60 pb-3 mb-3">Browse by Category</h4>
+              <ul class="space-y-3">
+
+                <!-- Category 1: IT & Software -->
+                <li class="category-group">
+                  <div class="category-toggle flex items-center justify-between text-sm font-semibold text-gray-700 hover:text-emerald-600 transition" onclick="toggleCategory(this)">
+                    <span>💻 IT & Software</span>
+                    <span class="flex items-center gap-2">
+                      <span class="text-xs text-gray-400 font-normal">(124)</span>
+                      <span class="arrow text-gray-400 text-xs">▶</span>
+                    </span>
+                  </div>
+                  <ul class="sub-category-list open pl-4 mt-1 space-y-1 border-l border-gray-200/60 ml-2">
+                    <li class="text-sm text-gray-500 hover:text-emerald-600 cursor-pointer transition">Software Development (45)</li>
+                    <li class="text-sm text-gray-500 hover:text-emerald-600 cursor-pointer transition">Network Engineering (22)</li>
+                    <li class="text-sm text-gray-500 hover:text-emerald-600 cursor-pointer transition">Cybersecurity (18)</li>
+                    <li class="text-sm text-gray-500 hover:text-emerald-600 cursor-pointer transition">Data Science (39)</li>
+                  </ul>
+                </li>
+
+                <!-- Category 2: Health & Medical -->
+                <li class="category-group">
+                  <div class="category-toggle flex items-center justify-between text-sm font-semibold text-gray-700 hover:text-emerald-600 transition" onclick="toggleCategory(this)">
+                    <span>🏥 Health & Medical</span>
+                    <span class="flex items-center gap-2">
+                      <span class="text-xs text-gray-400 font-normal">(87)</span>
+                      <span class="arrow text-gray-400 text-xs">▶</span>
+                    </span>
+                  </div>
+                  <ul class="sub-category-list pl-4 mt-1 space-y-1 border-l border-gray-200/60 ml-2">
+                    <li class="text-sm text-gray-500 hover:text-emerald-600 cursor-pointer transition">Nursing (34)</li>
+                    <li class="text-sm text-gray-500 hover:text-emerald-600 cursor-pointer transition">Clinical Medicine (28)</li>
+                    <li class="text-sm text-gray-500 hover:text-emerald-600 cursor-pointer transition">Pharmacy (25)</li>
+                  </ul>
+                </li>
+
+                <!-- Category 3: Finance & Accounting -->
+                <li class="category-group">
+                  <div class="category-toggle flex items-center justify-between text-sm font-semibold text-gray-700 hover:text-emerald-600 transition" onclick="toggleCategory(this)">
+                    <span>📊 Finance & Accounting</span>
+                    <span class="flex items-center gap-2">
+                      <span class="text-xs text-gray-400 font-normal">(63)</span>
+                      <span class="arrow text-gray-400 text-xs">▶</span>
+                    </span>
+                  </div>
+                  <ul class="sub-category-list pl-4 mt-1 space-y-1 border-l border-gray-200/60 ml-2">
+                    <li class="text-sm text-gray-500 hover:text-emerald-600 cursor-pointer transition">Accounting (28)</li>
+                    <li class="text-sm text-gray-500 hover:text-emerald-600 cursor-pointer transition">Auditing (20)</li>
+                    <li class="text-sm text-gray-500 hover:text-emerald-600 cursor-pointer transition">Financial Analysis (15)</li>
+                  </ul>
+                </li>
+
+                <!-- Category 4: Engineering -->
+                <li class="category-group">
+                  <div class="category-toggle flex items-center justify-between text-sm font-semibold text-gray-700 hover:text-emerald-600 transition" onclick="toggleCategory(this)">
+                    <span>🏗️ Engineering</span>
+                    <span class="flex items-center gap-2">
+                      <span class="text-xs text-gray-400 font-normal">(52)</span>
+                      <span class="arrow text-gray-400 text-xs">▶</span>
+                    </span>
+                  </div>
+                  <ul class="sub-category-list pl-4 mt-1 space-y-1 border-l border-gray-200/60 ml-2">
+                    <li class="text-sm text-gray-500 hover:text-emerald-600 cursor-pointer transition">Civil Engineering (18)</li>
+                    <li class="text-sm text-gray-500 hover:text-emerald-600 cursor-pointer transition">Electrical Engineering (15)</li>
+                    <li class="text-sm text-gray-500 hover:text-emerald-600 cursor-pointer transition">Mechanical Engineering (19)</li>
+                  </ul>
+                </li>
+
+              </ul>
+            </div>
+
+            <!-- 4. Trending Searches -->
+            <div class="bg-white/50 backdrop-blur-sm rounded-xl p-5 border border-white/60">
+              <h4 class="text-sm font-bold text-gray-700 uppercase tracking-wider flex items-center gap-2 border-b border-gray-200/60 pb-3 mb-4">
+                <span>🔥</span> Trending Searches
+              </h4>
+              <ul class="space-y-2">
+                <li><a href="#" class="flex items-center justify-between text-sm text-gray-700 hover:text-emerald-600 transition group p-2 rounded-lg hover:bg-emerald-50/50"><span>Teaching</span><span class="text-xs text-gray-400">→</span></a></li>
+                <li><a href="#" class="flex items-center justify-between text-sm text-gray-700 hover:text-emerald-600 transition group p-2 rounded-lg hover:bg-emerald-50/50"><span>Nursing</span><span class="text-xs text-gray-400">→</span></a></li>
+                <li><a href="#" class="flex items-center justify-between text-sm text-gray-700 hover:text-emerald-600 transition group p-2 rounded-lg hover:bg-emerald-50/50"><span>IT & Software</span><span class="text-xs text-gray-400">→</span></a></li>
+                <li><a href="#" class="flex items-center justify-between text-sm text-gray-700 hover:text-emerald-600 transition group p-2 rounded-lg hover:bg-emerald-50/50"><span>Driving</span><span class="text-xs text-gray-400">→</span></a></li>
+                <li><a href="#" class="flex items-center justify-between text-sm text-gray-700 hover:text-emerald-600 transition group p-2 rounded-lg hover:bg-emerald-50/50"><span>Accounting</span><span class="text-xs text-gray-400">→</span></a></li>
+                <li><a href="#" class="flex items-center justify-between text-sm text-gray-700 hover:text-emerald-600 transition group p-2 rounded-lg hover:bg-emerald-50/50"><span>Engineering</span><span class="text-xs text-gray-400">→</span></a></li>
+                <li><a href="#" class="flex items-center justify-between text-sm text-gray-700 hover:text-emerald-600 transition group p-2 rounded-lg hover:bg-emerald-50/50"><span>Hospitality</span><span class="text-xs text-gray-400">→</span></a></li>
+              </ul>
+            </div>
+
+            <!-- 5. CV Ad (Internal) -->
+            <div class="bg-gradient-to-br from-emerald-50 to-teal-50/80 rounded-xl p-5 border border-emerald-200/60 shadow-sm">
+              <div class="flex items-center gap-2 mb-2">
+                <span class="text-xl">📄</span>
+                <span class="text-xs font-bold text-emerald-700 bg-emerald-100/70 px-2.5 py-0.5 rounded-full">Internal Ad</span>
+              </div>
+              <h4 class="text-base font-extrabold text-gray-800">Your CV Opens Doors</h4>
+              <p class="text-sm text-gray-600 mt-1">Professional CV writing, cover letters, and LinkedIn optimization. From <span class="font-bold text-emerald-600">KSh 1,500</span>.</p>
+              <a href="#" class="mt-4 w-full text-center bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 px-4 rounded-lg transition shadow-md shadow-emerald-200 flex items-center justify-center gap-2 text-sm">
+                Improve My CV →
+              </a>
+            </div>
+
+            <!-- 6. Job Alerts -->
+            <div class="bg-white/50 backdrop-blur-sm rounded-xl p-5 border border-white/60">
+              <div class="flex items-center gap-2 mb-2">
+                <span class="text-xl">📬</span>
+                <h4 class="text-sm font-bold text-gray-700">Get Job Alerts</h4>
+              </div>
+              <p class="text-xs text-gray-600">Get new jobs matching your profile delivered to your inbox.</p>
+              <div class="mt-3 flex flex-col gap-2">
+                <input type="email" placeholder="Your email" class="w-full px-4 py-2 rounded-lg border border-gray-300 bg-white/70 text-sm focus:outline-none focus:border-emerald-600" />
+                <button class="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2 rounded-lg transition text-sm">Subscribe</button>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ============================================================ -->
+  <!-- FOOTER (matching homepage)                                    -->
+  <!-- ============================================================ -->
+  <footer class="bg-gray-900 text-white py-10">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+        <div>
+          <span class="text-2xl font-bold text-emerald-400">JobBoard</span>
+          <p class="mt-2 text-sm text-gray-400">Helping Kenyans discover verified jobs, internships, and opportunities every day.</p>
+        </div>
+        <div>
+          <h4 class="font-semibold text-white">Jobs</h4>
+          <ul class="mt-2 space-y-1 text-sm text-gray-400">
+            <li><a href="#" class="hover:text-white transition">Browse Jobs</a></li>
+            <li><a href="#" class="hover:text-white transition">Government Jobs</a></li>
+            <li><a href="#" class="hover:text-white transition">Internships</a></li>
+            <li><a href="#" class="hover:text-white transition">Casual & Part-time</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4 class="font-semibold text-white">Resources</h4>
+          <ul class="mt-2 space-y-1 text-sm text-gray-400">
+            <li><a href="#" class="hover:text-white transition">Career Advice</a></li>
+            <li><a href="#" class="hover:text-white transition">CV Writing</a></li>
+            <li><a href="#" class="hover:text-white transition">Interview Tips</a></li>
+            <li><a href="#" class="hover:text-white transition">Salary Guide</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4 class="font-semibold text-white">Company</h4>
+          <ul class="mt-2 space-y-1 text-sm text-gray-400">
+            <li><a href="#" class="hover:text-white transition">About</a></li>
+            <li><a href="#" class="hover:text-white transition">Contact</a></li>
+            <li><a href="#" class="hover:text-white transition">Privacy Policy</a></li>
+            <li><a href="#" class="hover:text-white transition">Terms</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="border-t border-gray-800 mt-8 pt-6 text-center text-sm text-gray-500">
+        &copy; 2026 JobBoard Kenya. All rights reserved.
+      </div>
+    </div>
+  </footer>
+
+  <!-- ============================================================ -->
+  <!-- JAVASCRIPT (optional interactions)                           -->
+  <!-- ============================================================ -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Filter chip toggle
+      const chips = document.querySelectorAll('.filter-chip');
+      chips.forEach(chip => {
+        chip.addEventListener('click', function() {
+          chips.forEach(c => {
+            c.classList.remove('active');
+            c.classList.add('inactive');
+          });
+          this.classList.remove('inactive');
+          this.classList.add('active');
+        });
+      });
+
+      // Pagination
+      const pageBtns = document.querySelectorAll('.page-btn');
+      pageBtns.forEach(btn => {
+        if (!btn.textContent.includes('←') && !btn.textContent.includes('→') && !btn.textContent.includes('…')) {
+          btn.addEventListener('click', function() {
+            pageBtns.forEach(b => {
+              b.classList.remove('active');
+              b.classList.add('inactive');
+            });
+            this.classList.remove('inactive');
+            this.classList.add('active');
+          });
+        }
+      });
+
+      // Results per page change handler (just an alert for prototype)
+      const perPageSelect = document.getElementById('per-page');
+      if (perPageSelect) {
+        perPageSelect.addEventListener('change', function() {
+          alert(`Showing ${this.value} jobs per page (UI would update here).`);
+        });
+      }
+    });
+
+    // Category Toggle Function
+    function toggleCategory(element) {
+      const parentLi = element.closest('.category-group');
+      const subList = parentLi.querySelector('.sub-category-list');
+      const toggleSpan = parentLi.querySelector('.category-toggle');
+
+      if (subList) {
+        subList.classList.toggle('open');
+        toggleSpan.classList.toggle('open');
+      }
+    }
+  </script>
+
+</body>
+</html>
+
+
+Job details page<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>JobBoard Kenya – Job Details</title>
+
+  <!-- Font: Nunito -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700;800&display=swap" rel="stylesheet" />
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { font-family: 'Nunito', sans-serif; margin: 0; padding: 0; background: #faf9f6; }
+    .section-bg { background: #faf9f6; }
+
+    .sidebar-sticky {
+      position: sticky;
+      top: 2rem;
+    }
+    @media (max-width: 1023px) {
+      .sidebar-sticky { position: static; }
+    }
+
+    /* Similar job item hover */
+    .similar-item {
+      transition: all 0.1s ease;
+      cursor: default;
+    }
+    .similar-item:hover .similar-title {
+      color: #15803d;
+    }
+    .similar-item:hover .similar-company {
+      color: #374151;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ============================================================ -->
+  <!-- HEADER (matching homepage)                                    -->
+  <!-- ============================================================ -->
+  <header class="bg-white/80 backdrop-blur-sm sticky top-0 z-50 border-b border-gray-200/50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16">
+      <div class="flex items-center gap-2">
+        <span class="text-2xl font-extrabold text-emerald-600">JobBoard</span>
+        <span class="text-[10px] font-bold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full uppercase">KE</span>
+      </div>
+      <nav class="hidden md:flex items-center gap-6 text-sm font-medium text-gray-700">
+        <a href="#" class="hover:text-emerald-600">Browse</a>
+        <a href="#" class="hover:text-emerald-600">Government</a>
+        <a href="#" class="hover:text-emerald-600">Internships</a>
+        <a href="#" class="hover:text-emerald-600">Resources</a>
+      </nav>
+      <div class="flex items-center gap-3">
+        <a href="#" class="hidden sm:inline-block text-sm font-medium text-emerald-600 border border-emerald-600 px-4 py-1.5 rounded-full hover:bg-emerald-50 transition">Post a Job</a>
+        <a href="#" class="bg-emerald-600 text-white px-4 py-1.5 rounded-full text-sm font-medium hover:bg-emerald-700 transition">Upload CV</a>
+        <button id="menu-toggle" class="md:hidden p-2 rounded-md text-gray-700 hover:bg-gray-100">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ============================================================ -->
+  <!-- JOB DETAILS PAGE                                             -->
+  <!-- ============================================================ -->
+  <main>
+
+    <!-- ===== BREADCRUMB ===== -->
+    <section class="section-bg py-4 border-b border-gray-200/50">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <nav class="flex items-center gap-2 text-sm text-gray-500">
+          <a href="#" class="hover:text-emerald-600 transition">Home</a>
+          <span>/</span>
+          <a href="#" class="hover:text-emerald-600 transition">Browse Jobs</a>
+          <span>/</span>
+          <span class="text-gray-700 font-medium">Senior Software Engineer</span>
+        </nav>
+      </div>
+    </section>
+
+    <!-- ===== MAIN CONTENT ===== -->
+    <section class="section-bg py-10">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+          <!-- ===== LEFT: Job Details (col-span-2) ===== -->
+          <div class="lg:col-span-2 space-y-6">
+
+            <!-- Job Header -->
+            <div class="bg-white/70 backdrop-blur-sm rounded-xl p-6 border border-white/60">
+              <div class="flex flex-wrap items-start justify-between gap-4">
+                <div>
+                  <div class="flex items-center gap-4">
+                    <div class="w-14 h-14 rounded-xl bg-gradient-to-br from-emerald-100 to-teal-100 flex items-center justify-center text-xl font-extrabold text-emerald-700 shadow-sm">S</div>
+                    <div>
+                      <h1 class="text-2xl md:text-3xl font-extrabold text-gray-800">Senior Software Engineer</h1>
+                      <p class="text-sm text-gray-500 flex items-center gap-2 mt-0.5">
+                        <span class="font-semibold text-gray-700">Safaricom</span>
+                        <span class="text-gray-300">•</span>
+                        <span>Nairobi, Kenya</span>
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                <div class="flex flex-wrap items-center gap-2">
+                  <span class="text-xs font-medium text-emerald-700 bg-emerald-100/70 px-2.5 py-1 rounded-full flex items-center gap-1">
+                    <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full"></span> 92% Match
+                  </span>
+                  <span class="text-xs font-medium text-green-600 bg-green-50 px-2.5 py-1 rounded-full">Full-time</span>
+                </div>
+              </div>
+              <div class="flex flex-wrap items-center gap-4 mt-4 pt-4 border-t border-gray-200/50 text-xs text-gray-500">
+                <span class="flex items-center gap-1.5">💰 <span class="font-medium text-gray-700">KSh 60,000 – 80,000</span></span>
+                <span class="text-gray-300">|</span>
+                <span class="flex items-center gap-1.5">📅 Posted <span class="font-medium text-gray-700">2 hours ago</span></span>
+                <span class="text-gray-300">|</span>
+                <span class="flex items-center gap-1.5">⏳ Closes <span class="font-medium text-red-600">30 June 2026</span></span>
+              </div>
+            </div>
+
+            <!-- Job Description -->
+            <div class="bg-white/70 backdrop-blur-sm rounded-xl p-6 border border-white/60">
+              <h2 class="text-lg font-extrabold text-gray-800">Job Description</h2>
+              <p class="text-sm text-gray-600 mt-3 leading-relaxed">We're looking for a passionate Senior Software Engineer to join our fintech team in Nairobi. You will be responsible for designing, developing, and maintaining high‑performance applications that power our mobile banking platform.</p>
+              <h3 class="text-md font-extrabold text-gray-800 mt-5">Key Responsibilities</h3>
+              <ul class="mt-2 space-y-1.5 text-sm text-gray-600 list-disc list-inside">
+                <li>Design and develop scalable microservices using Node.js and TypeScript.</li>
+                <li>Build responsive user interfaces with React.js and Tailwind CSS.</li>
+                <li>Mentor junior engineers and conduct code reviews.</li>
+              </ul>
+              <h3 class="text-md font-extrabold text-gray-800 mt-5">Requirements</h3>
+              <ul class="mt-2 space-y-1.5 text-sm text-gray-600 list-disc list-inside">
+                <li>5+ years of experience in software development.</li>
+                <li>Strong proficiency in Node.js, React, and TypeScript.</li>
+                <li>Excellent problem‑solving and communication skills.</li>
+              </ul>
+            </div>
+
+            <!-- Application Section -->
+            <div class="bg-gradient-to-br from-emerald-50 to-teal-50/80 rounded-xl p-6 border border-emerald-200/60 shadow-sm">
+              <div class="flex flex-wrap items-center justify-between gap-4">
+                <div>
+                  <h3 class="text-lg font-extrabold text-gray-800">Ready to apply?</h3>
+                  <p class="text-sm text-gray-600">Submit your application before the deadline.</p>
+                  <p class="text-xs text-red-600 font-medium mt-1">⏳ Closes in 10 days</p>
+                </div>
+                <div class="flex flex-wrap items-center gap-3">
+                  <a href="#" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-8 py-3 rounded-lg transition shadow-md shadow-emerald-200 flex items-center gap-2 text-sm">
+                    Apply Now
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+                  </a>
+                  <button class="bg-white/70 text-gray-700 hover:text-emerald-600 border border-gray-300 hover:border-emerald-400 font-medium px-4 py-2.5 rounded-lg transition text-sm flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
+                    Save
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Company Info -->
+            <div class="bg-white/70 backdrop-blur-sm rounded-xl p-6 border border-white/60">
+              <h2 class="text-lg font-extrabold text-gray-800">About the Company</h2>
+              <div class="flex items-start gap-4 mt-3">
+                <div class="w-16 h-16 rounded-xl bg-gradient-to-br from-emerald-100 to-teal-100 flex items-center justify-center text-xl font-extrabold text-emerald-700 shadow-sm flex-shrink-0">S</div>
+                <div>
+                  <h3 class="text-md font-bold text-gray-800">Safaricom</h3>
+                  <p class="text-sm text-gray-500">Telecommunications · Nairobi, Kenya</p>
+                  <p class="text-sm text-gray-600 mt-1 leading-relaxed">Safaricom is a leading telecommunications company in Kenya, providing mobile network, financial services, and enterprise solutions to millions of customers.</p>
+                  <a href="#" class="mt-2 inline-block text-sm font-medium text-emerald-600 hover:text-emerald-700 transition">Visit company website →</a>
+                </div>
+              </div>
+            </div>
+
+            <!-- Share & Report -->
+            <div class="flex flex-wrap items-center justify-between gap-3 text-sm text-gray-500">
+              <div class="flex items-center gap-3">
+                <span class="font-medium">Share:</span>
+                <a href="#" class="hover:text-emerald-600 transition">📧</a>
+                <a href="#" class="hover:text-emerald-600 transition">🐦</a>
+                <a href="#" class="hover:text-emerald-600 transition">💼</a>
+                <a href="#" class="hover:text-emerald-600 transition">📱</a>
+              </div>
+              <a href="#" class="text-xs text-gray-400 hover:text-red-500 transition">Report this job</a>
+            </div>
+
+            <!-- ===== SIMILAR JOBS – Clean List Style ===== -->
+            <div class="pt-4 border-t border-gray-200/50">
+              <h3 class="text-lg font-extrabold text-gray-800">Similar Jobs</h3>
+              <div class="mt-4 bg-white/40 backdrop-blur-sm rounded-xl border border-white/60 divide-y divide-gray-200/50">
+                <!-- Item 1 -->
+                <a href="#" class="similar-item flex flex-wrap items-center justify-between gap-2 py-3 px-5 hover:bg-emerald-50/30 transition rounded-t-xl">
+                  <div>
+                    <span class="similar-title text-sm font-semibold text-gray-800 transition">Full Stack Developer</span>
+                    <span class="similar-company text-sm text-gray-400 ml-2 transition">Equity Bank · Nairobi</span>
+                  </div>
+                  <span class="text-xs text-gray-500">KSh 55k – 70k</span>
+                </a>
+                <!-- Item 2 -->
+                <a href="#" class="similar-item flex flex-wrap items-center justify-between gap-2 py-3 px-5 hover:bg-emerald-50/30 transition">
+                  <div>
+                    <span class="similar-title text-sm font-semibold text-gray-800 transition">DevOps Engineer</span>
+                    <span class="similar-company text-sm text-gray-400 ml-2 transition">KCB · Nairobi</span>
+                  </div>
+                  <span class="text-xs text-gray-500">KSh 65k – 85k</span>
+                </a>
+                <!-- Item 3 -->
+                <a href="#" class="similar-item flex flex-wrap items-center justify-between gap-2 py-3 px-5 hover:bg-emerald-50/30 transition rounded-b-xl">
+                  <div>
+                    <span class="similar-title text-sm font-semibold text-gray-800 transition">Product Manager</span>
+                    <span class="similar-company text-sm text-gray-400 ml-2 transition">Safaricom · Nairobi</span>
+                  </div>
+                  <span class="text-xs text-gray-500">KSh 80k – 100k</span>
+                </a>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- ===== SIDEBAR ===== -->
+          <div class="lg:col-span-1 space-y-6 sidebar-sticky">
+
+            <!-- Smart Job Matching -->
+            <div class="bg-gradient-to-br from-emerald-50 to-teal-50/80 rounded-xl p-5 border border-emerald-200/60 shadow-sm">
+              <div class="flex items-center gap-2">
+                <span class="text-xl">🧠</span>
+                <span class="text-xs font-bold text-emerald-700 bg-emerald-100/70 px-2.5 py-0.5 rounded-full">Premium</span>
+              </div>
+              <h4 class="text-base font-extrabold text-gray-800 mt-1">Smart Job Matching</h4>
+              <p class="text-sm text-gray-600 mt-1 leading-relaxed">Upload your CV and let our AI find the perfect roles for you.</p>
+              <a href="#" class="mt-3 w-full text-center bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 px-4 rounded-lg transition shadow-md shadow-emerald-200 flex items-center justify-center gap-2 text-sm">
+                Upload CV & Get Matched →
+              </a>
+            </div>
+
+            <!-- Google Ad -->
+            <div class="bg-gray-100 rounded-xl flex items-center justify-center h-64 border border-gray-200 text-gray-400 text-sm">
+              <div class="text-center"><div>📢 Google Ad</div><div class="text-xs">(300x250)</div></div>
+            </div>
+
+            <!-- Job Summary -->
+            <div class="bg-white/50 backdrop-blur-sm rounded-xl p-5 border border-white/60">
+              <h4 class="text-sm font-bold text-gray-700 uppercase tracking-wider border-b border-gray-200/60 pb-3 mb-3">Job Summary</h4>
+              <div class="space-y-2.5 text-sm">
+                <div class="flex justify-between"><span class="text-gray-500">Experience</span><span class="font-medium text-gray-700">5+ years</span></div>
+                <div class="flex justify-between"><span class="text-gray-500">Employment Type</span><span class="font-medium text-gray-700">Full-time</span></div>
+                <div class="flex justify-between"><span class="text-gray-500">Location</span><span class="font-medium text-gray-700">Nairobi</span></div>
+                <div class="flex justify-between"><span class="text-gray-500">Remote</span><span class="font-medium text-gray-700">Hybrid</span></div>
+                <div class="flex justify-between"><span class="text-gray-500">Salary</span><span class="font-medium text-emerald-600">KSh 60k – 80k</span></div>
+                <div class="flex justify-between"><span class="text-gray-500">Deadline</span><span class="font-medium text-red-600">30 Jun 2026</span></div>
+              </div>
+            </div>
+
+            <!-- Trending Searches -->
+            <div class="bg-white/50 backdrop-blur-sm rounded-xl p-5 border border-white/60">
+              <h4 class="text-sm font-bold text-gray-700 uppercase tracking-wider flex items-center gap-2 border-b border-gray-200/60 pb-3 mb-4">
+                <span>🔥</span> Trending Searches
+              </h4>
+              <ul class="space-y-2">
+                <li><a href="#" class="flex items-center justify-between text-sm text-gray-700 hover:text-emerald-600 transition group p-2 rounded-lg hover:bg-emerald-50/50"><span>Teaching</span><span class="text-xs text-gray-400">→</span></a></li>
+                <li><a href="#" class="flex items-center justify-between text-sm text-gray-700 hover:text-emerald-600 transition group p-2 rounded-lg hover:bg-emerald-50/50"><span>Nursing</span><span class="text-xs text-gray-400">→</span></a></li>
+                <li><a href="#" class="flex items-center justify-between text-sm text-gray-700 hover:text-emerald-600 transition group p-2 rounded-lg hover:bg-emerald-50/50"><span>IT & Software</span><span class="text-xs text-gray-400">→</span></a></li>
+                <li><a href="#" class="flex items-center justify-between text-sm text-gray-700 hover:text-emerald-600 transition group p-2 rounded-lg hover:bg-emerald-50/50"><span>Driving</span><span class="text-xs text-gray-400">→</span></a></li>
+                <li><a href="#" class="flex items-center justify-between text-sm text-gray-700 hover:text-emerald-600 transition group p-2 rounded-lg hover:bg-emerald-50/50"><span>Accounting</span><span class="text-xs text-gray-400">→</span></a></li>
+                <li><a href="#" class="flex items-center justify-between text-sm text-gray-700 hover:text-emerald-600 transition group p-2 rounded-lg hover:bg-emerald-50/50"><span>Engineering</span><span class="text-xs text-gray-400">→</span></a></li>
+              </ul>
+            </div>
+
+            <!-- CV Ad -->
+            <div class="bg-gradient-to-br from-emerald-50 to-teal-50/80 rounded-xl p-5 border border-emerald-200/60 shadow-sm">
+              <div class="flex items-center gap-2 mb-2">
+                <span class="text-xl">📄</span>
+                <span class="text-xs font-bold text-emerald-700 bg-emerald-100/70 px-2.5 py-0.5 rounded-full">Internal Ad</span>
+              </div>
+              <h4 class="text-base font-extrabold text-gray-800">Your CV Opens Doors</h4>
+              <p class="text-sm text-gray-600 mt-1">Professional CV writing, cover letters, and LinkedIn optimization. From <span class="font-bold text-emerald-600">KSh 1,500</span>.</p>
+              <a href="#" class="mt-4 w-full text-center bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 px-4 rounded-lg transition shadow-md shadow-emerald-200 flex items-center justify-center gap-2 text-sm">
+                Improve My CV →
+              </a>
+            </div>
+
+            <!-- Job Alerts -->
+            <div class="bg-white/50 backdrop-blur-sm rounded-xl p-5 border border-white/60">
+              <div class="flex items-center gap-2 mb-2">
+                <span class="text-xl">📬</span>
+                <h4 class="text-sm font-bold text-gray-700">Get Job Alerts</h4>
+              </div>
+              <p class="text-xs text-gray-600">Get new jobs matching your profile delivered to your inbox.</p>
+              <div class="mt-3 flex flex-col gap-2">
+                <input type="email" placeholder="Your email" class="w-full px-4 py-2 rounded-lg border border-gray-300 bg-white/70 text-sm focus:outline-none focus:border-emerald-600" />
+                <button class="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2 rounded-lg transition text-sm">Subscribe</button>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ============================================================ -->
+  <!-- FOOTER                                                       -->
+  <!-- ============================================================ -->
+  <footer class="bg-gray-900 text-white py-10">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+        <div>
+          <span class="text-2xl font-bold text-emerald-400">JobBoard</span>
+          <p class="mt-2 text-sm text-gray-400">Helping Kenyans discover verified jobs, internships, and opportunities every day.</p>
+        </div>
+        <div>
+          <h4 class="font-semibold text-white">Jobs</h4>
+          <ul class="mt-2 space-y-1 text-sm text-gray-400">
+            <li><a href="#" class="hover:text-white transition">Browse Jobs</a></li>
+            <li><a href="#" class="hover:text-white transition">Government Jobs</a></li>
+            <li><a href="#" class="hover:text-white transition">Internships</a></li>
+            <li><a href="#" class="hover:text-white transition">Casual & Part-time</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4 class="font-semibold text-white">Resources</h4>
+          <ul class="mt-2 space-y-1 text-sm text-gray-400">
+            <li><a href="#" class="hover:text-white transition">Career Advice</a></li>
+            <li><a href="#" class="hover:text-white transition">CV Writing</a></li>
+            <li><a href="#" class="hover:text-white transition">Interview Tips</a></li>
+            <li><a href="#" class="hover:text-white transition">Salary Guide</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4 class="font-semibold text-white">Company</h4>
+          <ul class="mt-2 space-y-1 text-sm text-gray-400">
+            <li><a href="#" class="hover:text-white transition">About</a></li>
+            <li><a href="#" class="hover:text-white transition">Contact</a></li>
+            <li><a href="#" class="hover:text-white transition">Privacy Policy</a></li>
+            <li><a href="#" class="hover:text-white transition">Terms</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="border-t border-gray-800 mt-8 pt-6 text-center text-sm text-gray-500">&copy; 2026 JobBoard Kenya. All rights reserved.</div>
+    </div>
+  </footer>
+
+  <!-- ============================================================ -->
+  <!-- JAVASCRIPT                                                   -->
+  <!-- ============================================================ -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      document.getElementById('menu-toggle')?.addEventListener('click', function() {
+        alert('Mobile menu would open here.');
+      });
+    });
+  </script>
+
+</body>
+</html>
