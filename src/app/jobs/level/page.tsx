@@ -6,6 +6,8 @@ import { BreadcrumbNav } from '@/components/shared/BreadcrumbNav';
 import { generateBreadcrumbSchema, generateItemListSchema } from '@/lib/utils/seo';
 import { getExperienceLevelLabel, ExperienceLevelColors } from '@/lib/enums';
 
+export const dynamic = 'force-dynamic';
+
 // ============================================================
 // METADATA
 // ============================================================

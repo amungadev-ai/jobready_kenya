@@ -12,6 +12,8 @@ import { NewsletterSection } from '@/components/home/NewsletterSection';
 import { BottomAdBanner } from '@/components/home/BottomAdBanner';
 import { generateWebSiteSchema } from '@/lib/utils/seo';
 
+export const dynamic = 'force-dynamic';
+
 export default function HomePage() {
   return (
     <>

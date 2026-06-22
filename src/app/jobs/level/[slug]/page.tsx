@@ -10,6 +10,8 @@ import { SectionHeading } from '@/components/shared/SectionHeading';
 import { HubPageContent } from '@/components/hubs/HubPageContent';
 import { generateBreadcrumbSchema, generateCollectionPageSchema } from '@/lib/utils/seo';
 
+export const dynamic = 'force-dynamic';
+
 // ============================================================
 // TYPES
 // ============================================================

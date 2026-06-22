@@ -6,6 +6,8 @@ import { BreadcrumbNav } from '@/components/shared/BreadcrumbNav';
 import { generateBreadcrumbSchema, generateItemListSchema } from '@/lib/utils/seo';
 import { getEmploymentTypeLabel, EmploymentTypeColors } from '@/lib/enums';
 
+export const dynamic = 'force-dynamic';
+
 // ============================================================
 // METADATA
 // ============================================================

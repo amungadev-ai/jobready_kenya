@@ -4,6 +4,8 @@ import { getAllCategories } from '@/lib/data/categories';
 import { UNIQUE_COUNTIES } from '@/lib/data/counties';
 import { EmploymentType, ExperienceLevel, JobStatus, OpportunityType } from '@prisma/client';
 
+export const dynamic = 'force-dynamic';
+
 const SITE_URL = 'https://jobr.co.ke';
 
 // ============================================================

@@ -31,10 +31,10 @@ import {
 import type { OpportunityListItem } from '@/lib/data/opportunities';
 
 // ============================================================
-// ISR: revalidate every 1 hour
+// DYNAMIC RENDERING
 // ============================================================
 
-export const revalidate = 3600;
+export const dynamic = 'force-dynamic';
 
 // ============================================================
 // TYPES
