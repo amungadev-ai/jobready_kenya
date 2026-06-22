@@ -96,3 +96,26 @@ Stage Summary:
 - All pages working on https://jobready-kenya-mu.vercel.app
 - Three fixes applied: db.ts MySQL fallback, vercel.json cache bust, connection_limit=1
 - Debug endpoint added then removed
+---
+Task ID: 1
+Agent: main
+Task: Fix all pages crashing with server error on Vercel deployment
+
+Work Log:
+- Diagnosed root cause: all 15+ dynamic pages had zero error handling for DB queries
+- If DB connection fails from Vercel network, unhandled exception crashes the entire page
+- Verified MySQL database works from local environment (89 jobs, 35 orgs confirmed)
+- Created /api/health endpoint for real-time DB diagnostics on Vercel
+- Added try/catch to ALL 15 dynamic page components (jobs, categories, counties, opportunities, organizations, government, type/level hubs)
+- Added try/catch to ALL generateMetadata functions
+- Created global error.tsx boundary as safety net
+- Improved db.ts with explicit datasources config and testDbConnection() helper
+- Verified build passes (0 errors, 0 warnings)
+- Pushed to GitHub (commit c839b9a)
+
+Stage Summary:
+- Key fix: All pages now gracefully degrade to empty state instead of crashing
+- /api/health endpoint will reveal exact DB error on Vercel (network, auth, timeout, etc.)
+- Global error.tsx catches any remaining unhandled errors
+- User should check /api/health on Vercel to identify if it is a network connectivity issue
+---
