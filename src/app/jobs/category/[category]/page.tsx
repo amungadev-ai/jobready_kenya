@@ -38,27 +38,28 @@ export async function generateStaticParams() {
 // ============================================================
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  const { category: categorySlug } = await params;
-  const cat = await getCategoryBySlug(categorySlug).catch(() => null);
+  try {
+    const { category: categorySlug } = await params;
+    const cat = await getCategoryBySlug(categorySlug).catch(() => null);
 
-  if (!cat) return { title: 'Category Not Found | JOBR Kenya' };
+    if (!cat) return { title: 'Category Not Found | JOBR Kenya' };
 
-  // Strategy 5: NoIndex empty pages without SEO description
-  const isEmpty = cat._count.jobs === 0 && !cat.seoDescription && !cat.description;
+    const isEmpty = cat._count.jobs === 0 && !cat.seoDescription && !cat.description;
+    const title = `${cat.label} Jobs in Kenya`;
+    const description = cat.seoDescription
+      || `Browse ${cat._count.jobs}+ ${cat.label.toLowerCase()} job vacancies across Kenya. Find verified positions, apply directly, and advance your career with JOBR.`;
 
-  const title = `${cat.label} Jobs in Kenya`;
-  // Strategy 1: Use seoDescription as content buffer when available
-  const description = cat.seoDescription
-    || `Browse ${cat._count.jobs}+ ${cat.label.toLowerCase()} job vacancies across Kenya. Find verified positions, apply directly, and advance your career with JOBR.`;
-
-  return {
-    title,
-    description,
-    alternates: { canonical: `/jobs/category/${categorySlug}` },
-    openGraph: { title, description, siteName: 'JOBR Kenya' },
-    twitter: { card: 'summary_large_image', title, description },
-    ...(isEmpty && { robots: { index: false, follow: true } }),
-  };
+    return {
+      title,
+      description,
+      alternates: { canonical: `/jobs/category/${categorySlug}` },
+      openGraph: { title, description, siteName: 'JOBR Kenya' },
+      twitter: { card: 'summary_large_image', title, description },
+      ...(isEmpty && { robots: { index: false, follow: true } }),
+    };
+  } catch {
+    return { title: 'Jobs by Category | JOBR Kenya' };
+  }
 }
 
 // ============================================================
@@ -78,14 +79,26 @@ export default async function CategoryHubPage({ params, searchParams }: PageProp
   const { category: categorySlug } = await params;
   const page = Math.max(1, Number((await searchParams).page) || 1);
 
-  const [cat, relatedCats] = await Promise.all([
-    getCategoryBySlug(categorySlug),
-    getAllCategories().catch(() => []),
-  ]);
+  let cat: Awaited<ReturnType<typeof getCategoryBySlug>> = null;
+  let relatedCats: Awaited<ReturnType<typeof getAllCategories>> = [];
+  let jobsResult = { data: [] as any[], total: 0, page: 1, limit: 20, totalPages: 0 };
+
+  try {
+    [cat, relatedCats] = await Promise.all([
+      getCategoryBySlug(categorySlug),
+      getAllCategories().catch(() => []),
+    ]);
+  } catch (err) {
+    console.error('CategoryHubPage DB error:', err);
+  }
 
   if (!cat) notFound();
 
-  const jobsResult = await getJobsByCategory(categorySlug, page, 20);
+  try {
+    jobsResult = await getJobsByCategory(categorySlug, page, 20);
+  } catch (err) {
+    console.error('CategoryHubPage jobs fetch error:', err);
+  }
 
   const breadcrumbSchema = generateBreadcrumbSchema([
     { name: 'Home', href: 'https://jobr.co.ke' },

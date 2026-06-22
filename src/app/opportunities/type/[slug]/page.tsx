@@ -332,10 +332,17 @@ export default async function OpportunityTypeHubPage({ params, searchParams }: P
   const typeColor = OpportunityTypeColors[type];
 
   // Fetch data in parallel
-  const [result, allTypeCounts] = await Promise.all([
-    searchOpportunities({ type, sort: sortParam, page, limit: 20 }),
-    getOpportunityCountsByType().catch(() => ({}) as Record<OpportunityType, number>),
-  ]);
+  let result = { data: [] as any[], total: 0, page, limit: 20, totalPages: 0 };
+  let allTypeCounts = {} as Record<OpportunityType, number>;
+
+  try {
+    [result, allTypeCounts] = await Promise.all([
+      searchOpportunities({ type, sort: sortParam, page, limit: 20 }),
+      getOpportunityCountsByType().catch(() => ({}) as Record<OpportunityType, number>),
+    ]);
+  } catch (err) {
+    console.error('OpportunityTypePage error:', err);
+  }
 
   const seoTextFn = TYPE_SEO_TEXT[type];
   const seoText = seoTextFn ? seoTextFn(result.total) : '';

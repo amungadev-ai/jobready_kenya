@@ -116,21 +116,28 @@ export default async function JobsPage({ searchParams }: PageProps) {
       : 'all';
 
   // ----- Fetch data in parallel -----
-  const [jobsResult, categories] = await Promise.all([
-    searchJobs({
-      query,
-      employmentType,
-      experienceLevel,
-      locationCounty: county,
-      categoryId,
-      isRemote,
-      hasSalary,
-      sort: (params.sort as any) || undefined,
-      page,
-      limit,
-    }),
-    getAllCategories(),
-  ]);
+  let jobsResult = { data: [] as any[], total: 0, page, limit, totalPages: 0 };
+  let categories: Awaited<ReturnType<typeof getAllCategories>> = [];
+
+  try {
+    [jobsResult, categories] = await Promise.all([
+      searchJobs({
+        query,
+        employmentType,
+        experienceLevel,
+        locationCounty: county,
+        categoryId,
+        isRemote,
+        hasSalary,
+        sort: (params.sort as any) || undefined,
+        page,
+        limit,
+      }),
+      getAllCategories(),
+    ]);
+  } catch (err) {
+    console.error('JobsPage data fetch error:', err);
+  }
 
   // ----- Breadcrumb -----
   const breadcrumbItems: { label: string; href?: string }[] = [

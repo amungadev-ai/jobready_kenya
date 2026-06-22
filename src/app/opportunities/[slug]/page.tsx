@@ -69,37 +69,41 @@ export async function generateStaticParams() {
 // ============================================================
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  const { slug } = await params;
-  const opp = await getOpportunityBySlug(slug);
+  try {
+    const { slug } = await params;
+    const opp = await getOpportunityBySlug(slug);
 
-  if (!opp) {
-    return { title: 'Opportunity Not Found | JOBR Kenya' };
+    if (!opp) {
+      return { title: 'Opportunity Not Found | JOBR Kenya' };
+    }
+
+    const typeLabel = OpportunityTypeLabels[opp.type];
+    const description = opp.seoDescription
+      ? opp.seoDescription.slice(0, 160)
+      : truncate(opp.description, 160);
+
+    const title = opp.seoTitle || `${opp.title} — ${typeLabel}`;
+
+    return {
+      title,
+      description,
+      alternates: { canonical: `/opportunities/${opp.slug}` },
+      openGraph: {
+        title,
+        description,
+        type: 'article',
+        publishedTime: opp.datePosted.toISOString(),
+        ...(opp.deadline && { expiresTime: opp.deadline.toISOString() }),
+      },
+      twitter: {
+        card: 'summary_large_image',
+        title: `${opp.title} — ${typeLabel}`,
+        description,
+      },
+    };
+  } catch {
+    return { title: 'Opportunity | JOBR Kenya' };
   }
-
-  const typeLabel = OpportunityTypeLabels[opp.type];
-  const description = opp.seoDescription
-    ? opp.seoDescription.slice(0, 160)
-    : truncate(opp.description, 160);
-
-  const title = opp.seoTitle || `${opp.title} — ${typeLabel}`;
-
-  return {
-    title,
-    description,
-    alternates: { canonical: `/opportunities/${opp.slug}` },
-    openGraph: {
-      title,
-      description,
-      type: 'article',
-      publishedTime: opp.datePosted.toISOString(),
-      ...(opp.deadline && { expiresTime: opp.deadline.toISOString() }),
-    },
-    twitter: {
-      card: 'summary_large_image',
-      title,
-      description,
-    },
-  };
 }
 
 // ============================================================
@@ -304,17 +308,30 @@ function SimilarOpportunities({ opportunities, title }: { opportunities: Opportu
 export default async function OpportunityDetailPage({ params }: PageProps) {
   const { slug } = await params;
 
-  const opp = await getOpportunityBySlug(slug);
+  let opp: Awaited<ReturnType<typeof getOpportunityBySlug>> = null;
+  try {
+    opp = await getOpportunityBySlug(slug);
+  } catch (err) {
+    console.error('OpportunityDetailPage DB error:', err);
+  }
   if (!opp) notFound();
 
   // Fetch similar opps by type, by county, and more from provider in parallel
-  const [similarByType, similarByCounty, moreFromProvider] = await Promise.all([
-    getSimilarOpportunities(opp.id, opp.type, undefined, 5).catch(() => []),
-    opp.locationCounty
-      ? getSimilarOpportunities(opp.id, undefined, opp.locationCounty, 5).catch(() => [])
-      : Promise.resolve([]),
-    getOpportunitiesByProvider(opp.providerName, opp.id, 5).catch(() => []),
-  ]);
+  let similarByType: OpportunityListItem[] = [];
+  let similarByCounty: OpportunityListItem[] = [];
+  let moreFromProvider: OpportunityListItem[] = [];
+
+  try {
+    [similarByType, similarByCounty, moreFromProvider] = await Promise.all([
+      getSimilarOpportunities(opp.id, opp.type, undefined, 5).catch(() => []),
+      opp.locationCounty
+        ? getSimilarOpportunities(opp.id, undefined, opp.locationCounty, 5).catch(() => [])
+        : Promise.resolve([]),
+      getOpportunitiesByProvider(opp.providerName, opp.id, 5).catch(() => []),
+    ]);
+  } catch (err) {
+    console.error('OpportunityDetailPage similar fetch error:', err);
+  }
 
   // Deduplicate and prefer type-based similar, then county, then provider
   const seenIds = new Set([opp.id]);

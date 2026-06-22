@@ -31,28 +31,31 @@ export async function generateStaticParams() {
 // ============================================================
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  const { slug } = await params;
-  const county = getCountyBySlug(slug);
+  try {
+    const { slug } = await params;
+    const county = getCountyBySlug(slug);
 
-  if (!county) return { title: 'County Not Found | JOBR Kenya' };
+    if (!county) return { title: 'County Not Found | JOBR Kenya' };
 
-  // Strategy 5: NoIndex empty county pages
-  const jobCount = await getJobCount({
-    locationCounty: { equals: county.name },
-  }).catch(() => 0);
-  const isEmpty = jobCount === 0;
+    const jobCount = await getJobCount({
+      locationCounty: { equals: county.name },
+    }).catch(() => 0);
+    const isEmpty = jobCount === 0;
 
-  const title = `Jobs in ${county.name} County`;
-  const description = `Find verified job vacancies in ${county.name} County, Kenya. Browse positions from top employers, government offices, NGOs, and private companies in ${county.capital} and surrounding areas.`;
+    const title = `Jobs in ${county.name} County`;
+    const description = `Find verified job vacancies in ${county.name} County, Kenya. Browse positions from top employers, government offices, NGOs, and private companies in ${county.capital} and surrounding areas.`;
 
-  return {
-    title,
-    description,
-    alternates: { canonical: `/jobs/county/${slug}` },
-    openGraph: { title, description, siteName: 'JOBR Kenya' },
-    twitter: { card: 'summary_large_image', title, description },
-    ...(isEmpty && { robots: { index: false, follow: true } }),
-  };
+    return {
+      title,
+      description,
+      alternates: { canonical: `/jobs/county/${slug}` },
+      openGraph: { title, description, siteName: 'JOBR Kenya' },
+      twitter: { card: 'summary_large_image', title, description },
+      ...(isEmpty && { robots: { index: false, follow: true } }),
+    };
+  } catch {
+    return { title: 'Jobs by County | JOBR Kenya' };
+  }
 }
 
 // ============================================================
@@ -74,7 +77,13 @@ export default async function CountyHubPage({ params, searchParams }: PageProps)
   const county = getCountyBySlug(slug);
   if (!county) notFound();
 
-  const jobsResult = await getJobsByCounty(county.name, page, 20);
+  let jobsResult = { data: [] as any[], total: 0, page: 1, limit: 20, totalPages: 0 };
+
+  try {
+    jobsResult = await getJobsByCounty(county.name, page, 20);
+  } catch (err) {
+    console.error('CountyHubPage jobs fetch error:', err);
+  }
 
   const breadcrumbSchema = generateBreadcrumbSchema([
     { name: 'Home', href: 'https://jobr.co.ke' },

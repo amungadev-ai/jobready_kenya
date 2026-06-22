@@ -33,33 +33,37 @@ interface PageProps {
 // ============================================================
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  const { slug } = await params;
-  const job = await getJobBySlug(slug);
+  try {
+    const { slug } = await params;
+    const job = await getJobBySlug(slug);
 
-  if (!job) {
-    return { title: 'Job Not Found | JOBR Kenya' };
+    if (!job) {
+      return { title: 'Job Not Found | JOBR Kenya' };
+    }
+
+    const orgName = job.organization?.orgName ?? 'Unspecified Employer';
+    const description = truncate(job.description, 160);
+
+    return {
+      title: `${job.title} at ${orgName}`,
+      description,
+      alternates: { canonical: `/jobs/${job.slug}` },
+      openGraph: {
+        title: `${job.title} at ${orgName}`,
+        description,
+        type: 'article',
+        publishedTime: job.datePosted.toISOString(),
+        ...(job.deadline && { expiresTime: job.deadline.toISOString() }),
+      },
+      twitter: {
+        card: 'summary_large_image',
+        title: `${job.title} at ${orgName}`,
+        description,
+      },
+    };
+  } catch {
+    return { title: 'Job | JOBR Kenya' };
   }
-
-  const orgName = job.organization?.orgName ?? 'Unspecified Employer';
-  const description = truncate(job.description, 160);
-
-  return {
-    title: `${job.title} at ${orgName}`,
-    description,
-    alternates: { canonical: `/jobs/${job.slug}` },
-    openGraph: {
-      title: `${job.title} at ${orgName}`,
-      description,
-      type: 'article',
-      publishedTime: job.datePosted.toISOString(),
-      ...(job.deadline && { expiresTime: job.deadline.toISOString() }),
-    },
-    twitter: {
-      card: 'summary_large_image',
-      title: `${job.title} at ${orgName}`,
-      description,
-    },
-  };
 }
 
 // ============================================================
@@ -69,10 +73,17 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 export default async function JobDetailPage({ params }: PageProps) {
   const { slug } = await params;
 
-  const [job, similarJobs] = await Promise.all([
-    getJobBySlug(slug),
-    getSimilarJobs(slug, undefined, 5).catch(() => []),
-  ]);
+  let job: Awaited<ReturnType<typeof getJobBySlug>> = null;
+  let similarJobs: Awaited<ReturnType<typeof getSimilarJobs>> = [];
+
+  try {
+    [job, similarJobs] = await Promise.all([
+      getJobBySlug(slug),
+      getSimilarJobs(slug, undefined, 5).catch(() => []),
+    ]);
+  } catch (err) {
+    console.error('JobDetailPage DB error:', err);
+  }
 
   if (!job) {
     notFound();
@@ -81,7 +92,11 @@ export default async function JobDetailPage({ params }: PageProps) {
   // Re-fetch similar jobs with the correct category
   let relatedJobs = similarJobs;
   if (job.subcategory?.category?.id && similarJobs.length === 0) {
-    relatedJobs = await getSimilarJobs(job.id, job.subcategory.category.id, 5).catch(() => []);
+    try {
+      relatedJobs = await getSimilarJobs(job.id, job.subcategory.category.id, 5).catch(() => []);
+    } catch {
+      // ignore
+    }
   }
 
   // ── JSON-LD Schemas ──

@@ -81,7 +81,12 @@ export default async function LevelHubPage({ params, searchParams }: PageProps) 
   if (!level) notFound();
 
   const label = ExperienceLevelLabels[level];
-  const jobsResult = await getJobsByExperienceLevel(level, page, 20);
+  let jobsResult = { data: [] as any[], total: 0, page, limit: 20, totalPages: 0 };
+  try {
+    jobsResult = await getJobsByExperienceLevel(level, page, 20);
+  } catch (err) {
+    console.error('LevelHubPage error:', err);
+  }
 
   const breadcrumbSchema = generateBreadcrumbSchema([
     { name: 'Home', href: 'https://jobr.co.ke' },

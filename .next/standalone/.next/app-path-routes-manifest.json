@@ -5,6 +5,7 @@
   "/api/categories/route": "/api/categories",
   "/api/contact/route": "/api/contact",
   "/api/counties/route": "/api/counties",
+  "/api/health/route": "/api/health",
   "/api/jobs/[id]/route": "/api/jobs/[id]",
   "/api/jobs/route": "/api/jobs",
   "/api/opportunities/route": "/api/opportunities",

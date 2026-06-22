@@ -131,12 +131,22 @@ export default async function CategoryCountyComboPage({ params, searchParams }: 
   }
 
   // Fetch jobs for this category × county combination
-  const jobsResult = await getJobsByCategoryAndCounty(catSlug, countyData.name, page, 20);
+  let jobsResult = { data: [] as any[], total: 0, page, limit: 20, totalPages: 0 };
+  try {
+    jobsResult = await getJobsByCategoryAndCounty(catSlug, countyData.name, page, 20);
+  } catch (err) {
+    console.error('CategoryCountyPage error:', err);
+  }
 
   // Upward fallback: if no jobs in this combo, fetch county-wide jobs
-  const countyWideJobs = jobsResult.data.length === 0
-    ? await getJobsByCounty(countyData.name, 1, 6).catch(() => ({ data: [], total: 0, page: 1, limit: 6, totalPages: 0 }))
-    : null;
+  let countyWideJobs: any = null;
+  try {
+    countyWideJobs = jobsResult.data.length === 0
+      ? await getJobsByCounty(countyData.name, 1, 6).catch(() => ({ data: [], total: 0, page: 1, limit: 6, totalPages: 0 }))
+      : null;
+  } catch (err) {
+    console.error('CategoryCountyPage county fallback error:', err);
+  }
 
   const breadcrumbSchema = generateBreadcrumbSchema([
     { name: 'Home', href: 'https://jobr.co.ke' },

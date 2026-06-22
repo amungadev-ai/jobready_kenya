@@ -279,15 +279,28 @@ export default async function OrganizationProfilePage({
   const { slug } = await params;
   const page = Math.max(1, Number((await searchParams).page) || 1);
 
-  const org = await getOrganizationBySlug(slug).catch(() => null);
+  let org: Awaited<ReturnType<typeof getOrganizationBySlug>> = null;
+  try {
+    org = await getOrganizationBySlug(slug).catch(() => null);
+  } catch (err) {
+    console.error('OrganizationProfilePage error:', err);
+  }
   if (!org) notFound();
 
   // Fetch jobs, opportunities, and similar orgs in parallel
-  const [jobsResult, opportunities, similarOrgs] = await Promise.all([
-    getJobsByOrganization(org.id, page, 20),
-    getOpportunitiesByOrganization(org.id, 10).catch(() => []),
-    getSimilarOrganizations(org.orgIndustry, org.id, 5).catch(() => []),
-  ]);
+  let jobsResult = { data: [] as any[], total: 0, page, limit: 20, totalPages: 0 };
+  let opportunities: any[] = [];
+  let similarOrgs: any[] = [];
+
+  try {
+    [jobsResult, opportunities, similarOrgs] = await Promise.all([
+      getJobsByOrganization(org.id, page, 20),
+      getOpportunitiesByOrganization(org.id, 10).catch(() => []),
+      getSimilarOrganizations(org.orgIndustry, org.id, 5).catch(() => []),
+    ]);
+  } catch (err) {
+    console.error('OrganizationProfilePage data fetch error:', err);
+  }
 
   const socialLinks = parseSocialLinks(org.socialLinks);
   const activeJobs = org._count.jobs;

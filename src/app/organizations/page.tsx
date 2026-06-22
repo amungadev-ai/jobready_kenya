@@ -53,15 +53,20 @@ export default async function OrganizationsIndexPage({ searchParams }: PageProps
   const sort = sp.sort || '';
   const page = Math.max(1, Number(sp.page) || 1);
 
-  const result = await searchOrganizations({
-    search: q || undefined,
-    orgType: type || undefined,
-    orgIndustry: industry || undefined,
-    verified: verified === 'true' ? true : verified === 'false' ? false : undefined,
-    sort: (sort as 'name' | 'jobs' | 'recent') || undefined,
-    page,
-    limit: 24,
+  let result = { data: [] as any[], total: 0, page, limit: 24, totalPages: 0 };
+  try {
+    result = await searchOrganizations({
+      search: q || undefined,
+      orgType: type || undefined,
+      orgIndustry: industry || undefined,
+      verified: verified === 'true' ? true : verified === 'false' ? false : undefined,
+      sort: (sort as 'name' | 'jobs' | 'recent') || undefined,
+      page,
+      limit: 24,
   });
+  } catch (err) {
+    console.error('OrganizationsIndexPage error:', err);
+  }
 
   const breadcrumbSchema = generateBreadcrumbSchema([
     { name: 'Home', href: 'https://jobr.co.ke' },

@@ -449,17 +449,25 @@ export default async function OpportunitiesHubPage({ searchParams }: PageProps) 
   const query = params.q?.trim() || undefined;
 
   // ----- Fetch data in parallel -----
-  const [result, typeCounts, closingSoon] = await Promise.all([
-    searchOpportunities({
-      query,
-      type: type as OpportunityType | undefined,
-      sort: (params.sort as 'newest' | 'deadline-soon' | 'deadline-later') || undefined,
-      page,
-      limit,
-    }),
-    getOpportunityCountsByType().catch(() => ({} as Record<OpportunityType, number>)),
-    !query && !type ? getClosingSoonOpportunities(4).catch(() => []) : Promise.resolve([]),
-  ]);
+  let result = { data: [] as any[], total: 0, page, limit, totalPages: 0 };
+  let typeCounts = {} as Record<OpportunityType, number>;
+  let closingSoon: any[] = [];
+
+  try {
+    [result, typeCounts, closingSoon] = await Promise.all([
+      searchOpportunities({
+        query,
+        type: type as OpportunityType | undefined,
+        sort: (params.sort as 'newest' | 'deadline-soon' | 'deadline-later') || undefined,
+        page,
+        limit,
+      }),
+      getOpportunityCountsByType().catch(() => ({} as Record<OpportunityType, number>)),
+      !query && !type ? getClosingSoonOpportunities(4).catch(() => []) : Promise.resolve([]),
+    ]);
+  } catch (err) {
+    console.error('OpportunitiesHubPage error:', err);
+  }
 
   // ----- Breadcrumb -----
   const breadcrumbItems = [

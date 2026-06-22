@@ -55,10 +55,17 @@ Whether you are a fresh graduate seeking an entry-level position or an experienc
 // ============================================================
 
 export default async function GovernmentJobsPage() {
-  const [nationalJobs, countyJobs] = await Promise.all([
-    getGovernmentJobsByType(OrganizationType.NATIONAL_GOVERNMENT, 1, 10),
-    getGovernmentJobsByType(OrganizationType.COUNTY_GOVERNMENT, 1, 10),
-  ]);
+  let nationalJobs = { data: [] as any[], total: 0, page: 1, limit: 10, totalPages: 0 };
+  let countyJobs = { data: [] as any[], total: 0, page: 1, limit: 10, totalPages: 0 };
+
+  try {
+    [nationalJobs, countyJobs] = await Promise.all([
+      getGovernmentJobsByType(OrganizationType.NATIONAL_GOVERNMENT, 1, 10),
+      getGovernmentJobsByType(OrganizationType.COUNTY_GOVERNMENT, 1, 10),
+    ]);
+  } catch (err) {
+    console.error('GovernmentJobsPage error:', err);
+  }
 
   const totalGovernmentJobs = nationalJobs.total + countyJobs.total;
 

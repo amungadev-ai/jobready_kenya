@@ -80,7 +80,12 @@ export default async function TypeHubPage({ params, searchParams }: PageProps) {
   if (!type) notFound();
 
   const label = EmploymentTypeLabels[type];
-  const jobsResult = await getJobsByTypeFn(type, page, 20);
+  let jobsResult = { data: [] as any[], total: 0, page, limit: 20, totalPages: 0 };
+  try {
+    jobsResult = await getJobsByTypeFn(type, page, 20);
+  } catch (err) {
+    console.error('TypeHubPage error:', err);
+  }
 
   const breadcrumbSchema = generateBreadcrumbSchema([
     { name: 'Home', href: 'https://jobr.co.ke' },

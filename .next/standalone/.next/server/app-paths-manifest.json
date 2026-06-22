@@ -5,6 +5,7 @@
   "/api/categories/route": "app/api/categories/route.js",
   "/api/contact/route": "app/api/contact/route.js",
   "/api/counties/route": "app/api/counties/route.js",
+  "/api/health/route": "app/api/health/route.js",
   "/api/jobs/[id]/route": "app/api/jobs/[id]/route.js",
   "/api/jobs/route": "app/api/jobs/route.js",
   "/api/opportunities/route": "app/api/opportunities/route.js",
