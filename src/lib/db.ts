@@ -6,7 +6,7 @@ const globalForPrisma = globalThis as unknown as {
 
 const databaseUrl =
   process.env.DATABASE_URL ||
-  'mysql://jobready_database_admin:Admincyber@d7.my-control-panel.com:3306/jobready_database'
+  'mysql://jobready_database_admin:Admincyber@d7.my-control-panel.com:3306/jobready_database?connection_limit=5&pool_timeout=10'
 
 process.env.DATABASE_URL = databaseUrl
 
