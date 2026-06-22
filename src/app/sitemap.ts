@@ -173,7 +173,21 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }
 
   // ============================================================
-  // 9. OPPORTUNITY DETAIL PAGES (priority 0.7)
+  // 9. OPPORTUNITY TYPE HUB PAGES (priority 0.65)
+  // ============================================================
+
+  for (const type of Object.values(OpportunityType)) {
+    const slug = type.toLowerCase().replace(/_/g, '-');
+    entries.push({
+      url: `${SITE_URL}/opportunities/type/${slug}`,
+      lastModified: now,
+      changeFrequency: 'weekly',
+      priority: 0.65,
+    });
+  }
+
+  // ============================================================
+  // 10. OPPORTUNITY DETAIL PAGES (priority 0.7)
   // ============================================================
 
   for (const opp of opportunitySlugs) {
@@ -186,7 +200,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }
 
   // ============================================================
-  // 10. ORGANIZATION PROFILE PAGES (priority 0.7)
+  // 11. ORGANIZATION PROFILE PAGES (priority 0.7)
   // ============================================================
 
   for (const org of orgSlugs) {
@@ -199,7 +213,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }
 
   // ============================================================
-  // 11. RESOURCE ARTICLE PAGES (priority 0.5)
+  // 12. RESOURCE ARTICLE PAGES (priority 0.5)
   // ============================================================
 
   const resourceSlugs = [

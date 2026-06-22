@@ -10,12 +10,14 @@ import {
   Clock,
   CalendarDays,
   Banknote,
+  Building2,
 } from 'lucide-react';
 import { OpportunityType } from '@prisma/client';
 import {
   getOpportunityBySlug,
   getAllOpportunitySlugs,
   getSimilarOpportunities,
+  getOpportunitiesByProvider,
 } from '@/lib/data/opportunities';
 import type { OpportunityDetail, OpportunityListItem } from '@/lib/data/opportunities';
 import {
@@ -32,7 +34,8 @@ import {
   formatDate,
   isClosingSoon,
 } from '@/lib/utils/seo';
-import { GoogleAdPlaceholder } from '@/components/shared/MarketingSidebar';
+import { Badge } from '@/components/ui/badge';
+import { GoogleAdPlaceholder, SmartMatchingWidget } from '@/components/shared/MarketingSidebar';
 
 // ============================================================
 // RENDERING MODE
@@ -70,14 +73,18 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   }
 
   const typeLabel = OpportunityTypeLabels[opp.type];
-  const description = truncate(opp.description, 160);
+  const description = opp.seoDescription
+    ? opp.seoDescription.slice(0, 160)
+    : truncate(opp.description, 160);
+
+  const title = opp.seoTitle || `${opp.title} — ${typeLabel}`;
 
   return {
-    title: `${opp.title} — ${typeLabel}`,
+    title,
     description,
     alternates: { canonical: `/opportunities/${opp.slug}` },
     openGraph: {
-      title: `${opp.title} — ${typeLabel}`,
+      title,
       description,
       type: 'article',
       publishedTime: opp.datePosted.toISOString(),
@@ -85,7 +92,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     },
     twitter: {
       card: 'summary_large_image',
-      title: `${opp.title} — ${typeLabel}`,
+      title,
       description,
     },
   };
@@ -182,16 +189,77 @@ function DetailSection({
 }
 
 // ============================================================
-// SIMILAR OPPORTUNITIES
+// MORE FROM THIS PROVIDER
 // ============================================================
 
-function SimilarOpportunities({ opportunities }: { opportunities: OpportunityListItem[] }) {
+function MoreFromProvider({
+  opportunities,
+  providerName,
+  excludeId,
+}: {
+  opportunities: OpportunityListItem[];
+  providerName: string;
+  excludeId: string;
+}) {
   if (opportunities.length === 0) return null;
 
   return (
-    <div className="border-t border-gray-200/50 pt-4">
-      <h3 className="text-lg font-extrabold text-gray-800">Similar Opportunities</h3>
-      <div className="mt-4 divide-y divide-gray-200/50 rounded-xl border border-white/60 bg-white/70 backdrop-blur-sm">
+    <div className="rounded-xl border border-white/60 bg-white/70 backdrop-blur-sm">
+      <div className="border-b border-gray-200/60 px-6 py-4">
+        <h3 className="flex items-center gap-2 text-base font-extrabold text-gray-800">
+          <Building2 className="h-4 w-4" />
+          More from {providerName}
+        </h3>
+      </div>
+      <div className="divide-y divide-gray-200/50">
+        {opportunities.slice(0, 5).map((opp) => (
+          <Link
+            key={opp.id}
+            href={`/opportunities/${opp.slug}`}
+            className="flex items-center justify-between gap-3 px-6 py-3.5 transition hover:bg-emerald-50/30"
+          >
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-sm font-semibold text-gray-800 transition hover:text-emerald-600">
+                {opp.title}
+              </p>
+              <div className="mt-0.5 flex items-center gap-2">
+                <span className={`rounded-full border px-2 py-0.5 text-xs font-medium ${OpportunityTypeColors[opp.type]}`}>
+                  {OpportunityTypeLabels[opp.type]}
+                </span>
+                {opp.deadline && (
+                  <span className="text-xs text-gray-400">
+                    {formatRelativeDate(opp.datePosted)}
+                  </span>
+                )}
+              </div>
+            </div>
+            {opp.deadline && (
+              <span className={`shrink-0 text-xs font-medium ${
+                formatDeadlineCountdown(opp.deadline) === 'Closed'
+                  ? 'text-gray-400'
+                  : 'text-red-600'
+              }`}>
+                {formatDeadlineCountdown(opp.deadline)}
+              </span>
+            )}
+          </Link>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ============================================================
+// SIMILAR OPPORTUNITIES
+// ============================================================
+
+function SimilarOpportunities({ opportunities, title }: { opportunities: OpportunityListItem[]; title?: string }) {
+  if (opportunities.length === 0) return null;
+
+  return (
+    <div>
+      <h3 className="mb-4 text-lg font-extrabold text-gray-800">{title || 'Similar Opportunities'}</h3>
+      <div className="divide-y divide-gray-200/50 rounded-xl border border-white/60 bg-white/70 backdrop-blur-sm">
         {opportunities.slice(0, 5).map((opp, i) => {
           const location = getLocationLabel(opp.locationCity, opp.locationCounty, opp.isRemote, opp.isOnline);
 
@@ -232,19 +300,27 @@ function SimilarOpportunities({ opportunities }: { opportunities: OpportunityLis
 export default async function OpportunityDetailPage({ params }: PageProps) {
   const { slug } = await params;
 
-  const [opp, similarOpportunities] = await Promise.all([
-    getOpportunityBySlug(slug),
-    getSimilarOpportunities(slug, undefined, 5).catch(() => []),
+  const opp = await getOpportunityBySlug(slug);
+  if (!opp) notFound();
+
+  // Fetch similar opps by type, by county, and more from provider in parallel
+  const [similarByType, similarByCounty, moreFromProvider] = await Promise.all([
+    getSimilarOpportunities(opp.id, opp.type, undefined, 5).catch(() => []),
+    opp.locationCounty
+      ? getSimilarOpportunities(opp.id, undefined, opp.locationCounty, 5).catch(() => [])
+      : Promise.resolve([]),
+    getOpportunitiesByProvider(opp.providerName, opp.id, 5).catch(() => []),
   ]);
 
-  if (!opp) {
-    notFound();
-  }
+  // Deduplicate and prefer type-based similar, then county, then provider
+  const seenIds = new Set([opp.id]);
+  const relatedOpps: OpportunityListItem[] = [];
 
-  // If no similar found by default, try matching by type
-  let relatedOpps = similarOpportunities;
-  if (similarOpportunities.length === 0) {
-    relatedOpps = await getSimilarOpportunities(opp.id, opp.type, 5).catch(() => []);
+  for (const item of [...similarByType, ...similarByCounty]) {
+    if (!seenIds.has(item.id) && relatedOpps.length < 5) {
+      seenIds.add(item.id);
+      relatedOpps.push(item);
+    }
   }
 
   const typeLabel = OpportunityTypeLabels[opp.type];
@@ -263,9 +339,18 @@ export default async function OpportunityDetailPage({ params }: PageProps) {
   const breadcrumbSchema = generateBreadcrumbSchema([
     { name: 'Home', href: 'https://jobr.co.ke' },
     { name: 'Opportunities', href: 'https://jobr.co.ke/opportunities' },
-    { name: typeLabel, href: `https://jobr.co.ke/opportunities?type=${opp.type.toLowerCase().replace(/_/g, '-')}` },
+    { name: typeLabel, href: `https://jobr.co.ke/opportunities/type/${opp.type.toLowerCase().replace(/_/g, '-')}` },
     { name: opp.title },
   ]);
+
+  // Organization JSON-LD (when linked to a provider org)
+  const organizationSchema = opp.providerOrg ? {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    name: opp.providerOrg.orgName,
+    url: `https://jobr.co.ke/organizations/${opp.providerOrg.orgSlug}`,
+    ...(opp.providerWebsite && { sameAs: opp.providerWebsite }),
+  } : null;
 
   // ── Breadcrumb items ──
   const breadcrumbItems = [
@@ -273,7 +358,7 @@ export default async function OpportunityDetailPage({ params }: PageProps) {
     { label: 'Opportunities', href: '/opportunities' },
     {
       label: typeLabel,
-      href: `/opportunities?type=${opp.type.toLowerCase().replace(/_/g, '-')}`,
+      href: `/opportunities/type/${opp.type.toLowerCase().replace(/_/g, '-')}`,
     },
     { label: opp.title },
   ];
@@ -285,6 +370,13 @@ export default async function OpportunityDetailPage({ params }: PageProps) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
       />
+      {/* JSON-LD: Organization (if provider is linked) */}
+      {organizationSchema && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
+        />
+      )}
 
       <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
         {/* Breadcrumb */}
@@ -437,7 +529,7 @@ export default async function OpportunityDetailPage({ params }: PageProps) {
                   <p className="text-sm text-gray-600">Submit your application before the deadline.</p>
                   {opp.deadline && !isClosed && (
                     <p className="mt-1 text-xs font-medium text-red-600">
-                      ⏳ Closes in {deadlineText}
+                      Closes in {deadlineText}
                     </p>
                   )}
                 </div>
@@ -470,7 +562,14 @@ export default async function OpportunityDetailPage({ params }: PageProps) {
               </div>
             </div>
 
-            {/* ── Provider Info (in main content) ── */}
+            {/* ── More from this Provider ── */}
+            <MoreFromProvider
+              opportunities={moreFromProvider}
+              providerName={opp.providerName}
+              excludeId={opp.id}
+            />
+
+            {/* ── Provider Info ── */}
             <DetailSection title="About the Provider">
               <div className="flex items-start gap-4">
                 {opp.providerLogoUrl ? (
@@ -485,26 +584,43 @@ export default async function OpportunityDetailPage({ params }: PageProps) {
                   </div>
                 )}
                 <div>
-                  <h3 className="text-md font-bold text-gray-800">{opp.providerName}</h3>
+                  <h3 className="text-md font-bold text-gray-800">
+                    {opp.providerOrg ? (
+                      <Link href={`/organizations/${opp.providerOrg.orgSlug}`} className="transition hover:text-emerald-600">
+                        {opp.providerName}
+                      </Link>
+                    ) : opp.providerName}
+                  </h3>
                   <p className="text-sm text-gray-500">
                     {locationLabel}
                   </p>
                   <p className="mt-1 text-sm leading-relaxed text-gray-600">
                     {opp.providerOrg
-                      ? `${opp.providerName} is a verified organization on JOBR Kenya.`
+                      ? `${opp.providerName} is a verified organization on JOBR Kenya. View their full profile to see all active positions and opportunities.`
                       : `${opp.providerName} is the provider of this opportunity.`}
                   </p>
-                  {opp.providerWebsite && (
-                    <a
-                      href={opp.providerWebsite}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="mt-2 inline-flex items-center gap-1 text-sm font-medium text-emerald-600 transition hover:text-emerald-700"
-                    >
-                      <Globe className="h-3.5 w-3.5" />
-                      Visit provider website &rarr;
-                    </a>
-                  )}
+                  <div className="mt-2 flex flex-wrap items-center gap-3">
+                    {opp.providerOrg && (
+                      <Link
+                        href={`/organizations/${opp.providerOrg.orgSlug}`}
+                        className="inline-flex items-center gap-1 text-sm font-medium text-emerald-600 transition hover:text-emerald-700"
+                      >
+                        <Building2 className="h-3.5 w-3.5" />
+                        View Full Profile &rarr;
+                      </Link>
+                    )}
+                    {opp.providerWebsite && (
+                      <a
+                        href={opp.providerWebsite}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 text-sm font-medium text-emerald-600 transition hover:text-emerald-700"
+                      >
+                        <Globe className="h-3.5 w-3.5" />
+                        Visit website &rarr;
+                      </a>
+                    )}
+                  </div>
                 </div>
               </div>
             </DetailSection>
@@ -518,7 +634,7 @@ export default async function OpportunityDetailPage({ params }: PageProps) {
                   className="transition hover:text-emerald-600"
                   title="Share via email"
                 >
-                  &#x1F4E7;
+                  Email
                 </a>
                 <a
                   href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(opp.title)}&url=${encodeURIComponent(`https://jobr.co.ke/opportunities/${opp.slug}`)}`}
@@ -527,7 +643,7 @@ export default async function OpportunityDetailPage({ params }: PageProps) {
                   className="transition hover:text-emerald-600"
                   title="Share on X (Twitter)"
                 >
-                  &#x1F426;
+                  X
                 </a>
                 <a
                   href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(`https://jobr.co.ke/opportunities/${opp.slug}`)}`}
@@ -536,7 +652,7 @@ export default async function OpportunityDetailPage({ params }: PageProps) {
                   className="transition hover:text-emerald-600"
                   title="Share on LinkedIn"
                 >
-                  &#x1F4BC;
+                  LinkedIn
                 </a>
                 <a
                   href={`https://api.whatsapp.com/send?text=${encodeURIComponent(`${opp.title} — https://jobr.co.ke/opportunities/${opp.slug}`)}`}
@@ -545,7 +661,7 @@ export default async function OpportunityDetailPage({ params }: PageProps) {
                   className="transition hover:text-emerald-600"
                   title="Share on WhatsApp"
                 >
-                  &#x1F4F1;
+                  WhatsApp
                 </a>
               </div>
               <a
@@ -557,7 +673,10 @@ export default async function OpportunityDetailPage({ params }: PageProps) {
             </div>
 
             {/* ── Similar Opportunities ── */}
-            <SimilarOpportunities opportunities={relatedOpps} />
+            <SimilarOpportunities
+              opportunities={relatedOpps}
+              title={opp.locationCounty ? `More in ${opp.locationCounty}` : 'Similar Opportunities'}
+            />
           </div>
 
           {/* Right: Sidebar (1/3) */}
@@ -687,7 +806,13 @@ export default async function OpportunityDetailPage({ params }: PageProps) {
                   )}
                   <div className="min-w-0">
                     <p className="text-xs text-gray-500">Provided by</p>
-                    <p className="text-sm font-bold text-gray-800 truncate">{opp.providerName}</p>
+                    {opp.providerOrg ? (
+                      <Link href={`/organizations/${opp.providerOrg.orgSlug}`} className="block text-sm font-bold text-gray-800 truncate transition hover:text-emerald-600">
+                        {opp.providerName}
+                      </Link>
+                    ) : (
+                      <p className="text-sm font-bold text-gray-800 truncate">{opp.providerName}</p>
+                    )}
                     {opp.providerWebsite && (
                       <a
                         href={opp.providerWebsite}
@@ -701,6 +826,9 @@ export default async function OpportunityDetailPage({ params }: PageProps) {
                   </div>
                 </div>
               </div>
+
+              {/* Smart Matching Widget */}
+              <SmartMatchingWidget />
 
               {/* Ad Placeholder */}
               <GoogleAdPlaceholder />

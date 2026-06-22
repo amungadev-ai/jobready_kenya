@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import { Search, Menu, ChevronDown, Briefcase, MapPin, Building2, GraduationCap } from 'lucide-react';
+import { Search, Menu, ChevronDown, Briefcase, MapPin, Building2, GraduationCap, Award } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Sheet,
@@ -17,8 +17,18 @@ const NAV_LINKS = [
   { label: 'Jobs', href: '/jobs' },
   { label: 'Government Jobs', href: '/jobs?type=government' },
   { label: 'Internships', href: '/jobs?employmentType=internship' },
-  { label: 'Opportunities', href: '/opportunities' },
   { label: 'Career Advice', href: '/career-advice' },
+] as const;
+
+const OPPORTUNITY_TYPE_LINKS = [
+  { label: 'Scholarships', href: '/opportunities/type/scholarship' },
+  { label: 'Grants', href: '/opportunities/type/grant' },
+  { label: 'Fellowships', href: '/opportunities/type/fellowship' },
+  { label: 'Mentorship', href: '/opportunities/type/mentorship' },
+  { label: 'Training', href: '/opportunities/type/training' },
+  { label: 'Competitions', href: '/opportunities/type/competition' },
+  { label: 'Conferences', href: '/opportunities/type/conference' },
+  { label: 'Volunteering', href: '/opportunities/type/volunteer' },
 ] as const;
 
 // ------------------------------------------------------------------
@@ -217,6 +227,24 @@ export function SiteHeader() {
           {/* Desktop nav */}
           <nav className="hidden items-center gap-5 lg:flex">
             <NavDropdown triggerLabel="Browse" sections={dropdownSections} />
+            <NavDropdown
+              triggerLabel="Opportunities"
+              sections={[
+                {
+                  title: 'By Type',
+                  icon: <Award className="h-3.5 w-3.5" />,
+                  items: OPPORTUNITY_TYPE_LINKS.map((l) => ({ label: l.label, href: l.href })),
+                },
+                {
+                  title: 'Quick Links',
+                  icon: <GraduationCap className="h-3.5 w-3.5" />,
+                  items: [
+                    { label: 'All Opportunities', href: '/opportunities' },
+                    { label: 'Organizations', href: '/organizations' },
+                  ],
+                },
+              ]}
+            />
             {NAV_LINKS.slice(1).map((link) => (
               <Link
                 key={link.href}
@@ -296,6 +324,32 @@ export function SiteHeader() {
                       className="rounded-lg px-4 py-3 text-sm font-medium text-gray-700 transition hover:bg-emerald-50 hover:text-emerald-700"
                     >
                       All Jobs
+                    </Link>
+                  </SheetClose>
+                  <SheetClose asChild>
+                    <Link
+                      href="/opportunities"
+                      className="rounded-lg px-4 py-3 text-sm font-medium text-gray-700 transition hover:bg-emerald-50 hover:text-emerald-700"
+                    >
+                      All Opportunities
+                    </Link>
+                  </SheetClose>
+                  {OPPORTUNITY_TYPE_LINKS.slice(0, 4).map((link) => (
+                    <SheetClose key={link.href} asChild>
+                      <Link
+                        href={link.href}
+                        className="rounded-lg px-4 py-2.5 text-sm text-gray-600 transition hover:bg-emerald-50 hover:text-emerald-700"
+                      >
+                        {link.label}
+                      </Link>
+                    </SheetClose>
+                  ))}
+                  <SheetClose asChild>
+                    <Link
+                      href="/organizations"
+                      className="rounded-lg px-4 py-3 text-sm font-medium text-gray-700 transition hover:bg-emerald-50 hover:text-emerald-700"
+                    >
+                      Organizations
                     </Link>
                   </SheetClose>
                   {NAV_LINKS.slice(1).map((link) => (

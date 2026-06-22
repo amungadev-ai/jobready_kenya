@@ -8,6 +8,15 @@ import {
   BadgeCheck,
   Building2,
   SearchX,
+  Clock,
+  Briefcase,
+  CalendarDays,
+  Users,
+  Twitter,
+  Linkedin,
+  Facebook,
+  Instagram,
+  Link as LinkIcon,
 } from 'lucide-react';
 import { getOrganizationBySlug, getActiveOrganizationSlugs, getSimilarOrganizations } from '@/lib/data/organizations';
 import { getJobsByOrganization } from '@/lib/data/jobs';
@@ -27,8 +36,9 @@ import {
   OpportunityTypeLabels,
   OpportunityTypeColors,
 } from '@/lib/enums';
-import { generateBreadcrumbSchema, formatRelativeDate } from '@/lib/utils/seo';
+import { generateBreadcrumbSchema, formatRelativeDate, formatDeadlineCountdown } from '@/lib/utils/seo';
 import { Badge } from '@/components/ui/badge';
+import type { OpportunityListItem } from '@/lib/data/opportunities';
 
 // ============================================================
 // TYPES
@@ -62,13 +72,13 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   if (!org) return { title: 'Organization Not Found | JOBR Kenya' };
 
-  const title = `${org.orgName} Jobs & Careers`;
-  const description =
-    org.orgDescription
-      ? org.orgDescription.slice(0, 155)
-      : `Find the latest jobs and career opportunities at ${org.orgName}. Browse verified positions and apply directly on JOBR Kenya.`;
+  const title = org.seoTitle || `${org.orgName} Jobs & Careers`;
+  const description = org.seoDescription
+    ? org.seoDescription.slice(0, 155)
+    : `Find the latest jobs and career opportunities at ${org.orgName}. Browse verified positions and apply directly on JOBR Kenya.`;
 
-  const isEmpty = org._count.jobs === 0;
+  const totalListings = org._count.jobs + org._count.providedOpportunities;
+  const isEmpty = totalListings === 0;
 
   return {
     title,
@@ -99,6 +109,163 @@ function getInitials(name: string): string {
     .toUpperCase();
 }
 
+function parseSocialLinks(jsonString: string | null | undefined): { platform: string; url: string }[] {
+  if (!jsonString) return [];
+  try {
+    const parsed = JSON.parse(jsonString);
+    if (Array.isArray(parsed)) {
+      return parsed.map((item: any) => ({
+        platform: (item.platform || item.name || '').toLowerCase(),
+        url: item.url || item.href || '',
+      })).filter((l: any) => l.url);
+    }
+    if (typeof parsed === 'object') {
+      return Object.entries(parsed).map(([platform, url]) => ({
+        platform: platform.toLowerCase(),
+        url: url as string,
+      })).filter((l) => l.url);
+    }
+  } catch {
+    // Try to parse as URL-separated string
+    if (jsonString.includes('http')) {
+      return jsonString
+        .split(/[\n,]+/)
+        .map((url) => url.trim())
+        .filter(Boolean)
+        .map((url) => ({ platform: 'website', url }));
+    }
+  }
+  return [];
+}
+
+function getSocialIcon(platform: string) {
+  const p = platform.toLowerCase();
+  if (p.includes('twitter') || p.includes('x.com')) return Twitter;
+  if (p.includes('linkedin')) return Linkedin;
+  if (p.includes('facebook')) return Facebook;
+  if (p.includes('instagram')) return Instagram;
+  return LinkIcon;
+}
+
+function getSocialLabel(platform: string): string {
+  const p = platform.toLowerCase();
+  if (p.includes('twitter') || p.includes('x.com')) return 'X / Twitter';
+  if (p.includes('linkedin')) return 'LinkedIn';
+  if (p.includes('facebook')) return 'Facebook';
+  if (p.includes('instagram')) return 'Instagram';
+  return 'Website';
+}
+
+function getLocationLabel(
+  city?: string | null,
+  county?: string | null,
+  isRemote?: boolean,
+  isOnline?: boolean
+): string {
+  const parts: string[] = [];
+  if (isOnline) parts.push('Online');
+  else if (isRemote) parts.push('Remote');
+  if (city) parts.push(city);
+  else if (county) parts.push(county);
+  return parts.join(', ') || 'Kenya';
+}
+
+// ============================================================
+// OPPORTUNITY CARD (for org profile)
+// ============================================================
+
+function OpportunityCard({ opp }: { opp: OpportunityListItem }) {
+  const deadlineText = opp.deadline ? formatDeadlineCountdown(opp.deadline) : null;
+
+  return (
+    <Link
+      key={opp.id}
+      href={`/opportunities/${opp.slug}`}
+      className="group flex items-start gap-3 rounded-xl border border-white/60 bg-white/70 p-4 backdrop-blur-sm transition hover:border-emerald-300 hover:bg-emerald-50/30"
+    >
+      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-emerald-50 text-xs font-bold text-emerald-700">
+        {opp.type.slice(0, 3).toUpperCase()}
+      </div>
+      <div className="min-w-0 flex-1">
+        <h3 className="text-sm font-semibold text-gray-800 transition group-hover:text-emerald-600">
+          {opp.title}
+        </h3>
+        <div className="mt-1 flex flex-wrap items-center gap-1.5">
+          <Badge
+            variant="outline"
+            className={`text-xs font-medium ${OpportunityTypeColors[opp.type]}`}
+          >
+            {OpportunityTypeLabels[opp.type]}
+          </Badge>
+          {opp.deadline && deadlineText && deadlineText !== 'Closed' && (
+            <span className="flex items-center gap-0.5 text-xs text-red-600">
+              <Clock className="h-3 w-3" />
+              {deadlineText}
+            </span>
+          )}
+          {!opp.deadline && (
+            <span className="text-xs text-gray-400">
+              {formatRelativeDate(opp.datePosted)}
+            </span>
+          )}
+        </div>
+      </div>
+    </Link>
+  );
+}
+
+// ============================================================
+// STATS BAR
+// ============================================================
+
+function StatsBar({
+  jobs,
+  opportunities,
+  isVerified,
+  memberSince,
+}: {
+  jobs: number;
+  opportunities: number;
+  isVerified: boolean;
+  memberSince: Date;
+}) {
+  const yearsActive = Math.max(1, Math.ceil((Date.now() - memberSince.getTime()) / (365.25 * 24 * 60 * 60 * 1000)));
+  const totalListings = jobs + opportunities;
+
+  return (
+    <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+      <div className="rounded-xl border border-white/60 bg-white/70 p-4 text-center backdrop-blur-sm">
+        <div className="flex items-center justify-center gap-1.5">
+          <Briefcase className="h-4 w-4 text-emerald-600" />
+          <span className="text-xl font-extrabold text-emerald-600">{jobs}</span>
+        </div>
+        <p className="mt-1 text-xs text-gray-500">Active Jobs</p>
+      </div>
+      <div className="rounded-xl border border-white/60 bg-white/70 p-4 text-center backdrop-blur-sm">
+        <div className="flex items-center justify-center gap-1.5">
+          <CalendarDays className="h-4 w-4 text-blue-600" />
+          <span className="text-xl font-extrabold text-blue-600">{opportunities}</span>
+        </div>
+        <p className="mt-1 text-xs text-gray-500">Opportunities</p>
+      </div>
+      <div className="rounded-xl border border-white/60 bg-white/70 p-4 text-center backdrop-blur-sm">
+        <div className="flex items-center justify-center gap-1.5">
+          <Users className="h-4 w-4 text-purple-600" />
+          <span className="text-xl font-extrabold text-purple-600">{totalListings}</span>
+        </div>
+        <p className="mt-1 text-xs text-gray-500">Total Listings</p>
+      </div>
+      <div className="rounded-xl border border-white/60 bg-white/70 p-4 text-center backdrop-blur-sm">
+        <div className="flex items-center justify-center gap-1.5">
+          <Building2 className="h-4 w-4 text-amber-600" />
+          <span className="text-xl font-extrabold text-amber-600">{yearsActive}yr</span>
+        </div>
+        <p className="mt-1 text-xs text-gray-500">On JOBR</p>
+      </div>
+    </div>
+  );
+}
+
 // ============================================================
 // PAGE
 // ============================================================
@@ -116,9 +283,13 @@ export default async function OrganizationProfilePage({
   // Fetch jobs, opportunities, and similar orgs in parallel
   const [jobsResult, opportunities, similarOrgs] = await Promise.all([
     getJobsByOrganization(org.id, page, 20),
-    getOpportunitiesByOrganization(org.id, 6).catch(() => []),
+    getOpportunitiesByOrganization(org.id, 10).catch(() => []),
     getSimilarOrganizations(org.orgIndustry, org.id, 5).catch(() => []),
   ]);
+
+  const socialLinks = parseSocialLinks(org.socialLinks);
+  const activeJobs = org._count.jobs;
+  const activeOpportunities = org._count.providedOpportunities;
 
   const breadcrumbSchema = generateBreadcrumbSchema([
     { name: 'Home', href: 'https://jobr.co.ke' },
@@ -139,6 +310,7 @@ export default async function OrganizationProfilePage({
         addressCountry: 'KE',
       },
     }),
+    ...(org.orgDescription && { description: org.orgDescription.slice(0, 300) }),
   };
 
   const breadcrumbItems = [
@@ -146,8 +318,6 @@ export default async function OrganizationProfilePage({
     { label: 'Organizations', href: '/organizations' },
     { label: org.orgName },
   ];
-
-  const activeJobs = org._count.jobs;
 
   return (
     <>
@@ -227,9 +397,9 @@ export default async function OrganizationProfilePage({
                     )}
                   </div>
 
-                  {/* Website link */}
-                  {org.orgWebsite && (
-                    <div className="mt-3">
+                  {/* Website + Social links */}
+                  <div className="mt-3 flex flex-wrap items-center gap-3">
+                    {org.orgWebsite && (
                       <a
                         href={org.orgWebsite}
                         target="_blank"
@@ -240,25 +410,35 @@ export default async function OrganizationProfilePage({
                         Visit Website
                         <ExternalLink className="h-3 w-3" />
                       </a>
-                    </div>
-                  )}
-
-                  {/* Stats */}
-                  <div className="mt-3 flex items-center gap-4 text-sm text-gray-500">
-                    <span>
-                      <span className="font-semibold text-emerald-600">{activeJobs}</span> active{' '}
-                      {activeJobs === 1 ? 'job' : 'jobs'}
-                    </span>
-                    {opportunities.length > 0 && (
-                      <span>
-                        <span className="font-semibold text-emerald-600">{opportunities.length}</span>{' '}
-                        {opportunities.length === 1 ? 'opportunity' : 'opportunities'}
-                      </span>
                     )}
+                    {socialLinks.map((link, i) => {
+                      const Icon = getSocialIcon(link.platform);
+                      return (
+                        <a
+                          key={i}
+                          href={link.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 text-sm text-gray-500 transition hover:text-emerald-600"
+                          title={getSocialLabel(link.platform)}
+                        >
+                          <Icon className="h-3.5 w-3.5" />
+                          {getSocialLabel(link.platform)}
+                        </a>
+                      );
+                    })}
                   </div>
                 </div>
               </div>
             </div>
+
+            {/* ── Stats Bar ── */}
+            <StatsBar
+              jobs={activeJobs}
+              opportunities={activeOpportunities}
+              isVerified={org.isVerified}
+              memberSince={org.createdAt}
+            />
 
             {/* ── Organization Description ── */}
             {org.orgDescription && (
@@ -279,6 +459,7 @@ export default async function OrganizationProfilePage({
               <SectionHeading
                 title={`Jobs at ${org.orgName}`}
                 subtitle={`${jobsResult.total} active ${jobsResult.total === 1 ? 'position' : 'positions'}`}
+                viewAllHref={jobsResult.total > 20 ? `/organizations/${slug}` : undefined}
               />
               {jobsResult.data.length > 0 ? (
                 <div className="mt-4 space-y-4">
@@ -375,43 +556,16 @@ export default async function OrganizationProfilePage({
 
             {/* ── Opportunities ── */}
             {opportunities.length > 0 && (
-              <div className="mt-8">
+              <div className="mt-4">
                 <SectionHeading
                   title="Opportunities"
-                  subtitle={`Scholarships, grants, and programs from ${org.orgName}`}
+                  subtitle={`${activeOpportunities} ${activeOpportunities === 1 ? 'opportunity' : 'opportunities'} from ${org.orgName} — scholarships, grants, fellowships, and more`}
+                  viewAllHref="/opportunities"
+                  viewAllText="All Opportunities"
                 />
                 <div className="mt-4 space-y-3">
                   {opportunities.map((opp) => (
-                    <Link
-                      key={opp.id}
-                      href={`/opportunities/${opp.slug}`}
-                      className="group flex items-start gap-3 rounded-xl border border-white/60 bg-white/70 p-4 backdrop-blur-sm transition hover:border-emerald-300 hover:bg-emerald-50/30"
-                    >
-                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-emerald-50 text-xs font-bold text-emerald-700">
-                        {opp.type.slice(0, 3).toUpperCase()}
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <h3 className="text-sm font-semibold text-gray-800 transition group-hover:text-emerald-600">
-                          {opp.title}
-                        </h3>
-                        <div className="mt-1 flex flex-wrap items-center gap-1.5">
-                          <Badge
-                            variant="outline"
-                            className={`text-xs font-medium ${
-                              (OpportunityTypeColors as any)[opp.type] ??
-                              'border-gray-200 bg-gray-50 text-gray-600'
-                            }`}
-                          >
-                            {(OpportunityTypeLabels as any)[opp.type] ?? opp.type}
-                          </Badge>
-                          {opp.deadline && (
-                            <span className="text-xs text-gray-400">
-                              Deadline: {formatRelativeDate(opp.deadline)}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    </Link>
+                    <OpportunityCard key={opp.id} opp={opp} />
                   ))}
                 </div>
               </div>
@@ -454,6 +608,9 @@ export default async function OrganizationProfilePage({
                           </span>
                           <span className="text-xs text-gray-400">
                             {s._count.jobs} {s._count.jobs === 1 ? 'job' : 'jobs'}
+                            {s._count.providedOpportunities > 0 && (
+                              <> · {s._count.providedOpportunities} opps</>
+                            )}
                           </span>
                         </div>
                       </Link>

@@ -1,5 +1,5 @@
 import { db } from '@/lib/db';
-import { OrganizationType } from '@prisma/client';
+import { OrganizationType, JobStatus } from '@prisma/client';
 
 // ============================================================
 // TYPES
@@ -16,6 +16,7 @@ export interface OrganizationListItem {
   isVerified: boolean;
   _count: {
     jobs: number;
+    providedOpportunities: number;
   };
 }
 
@@ -23,26 +24,25 @@ export interface OrganizationDetail extends OrganizationListItem {
   orgWebsite?: string | null;
   orgDescription?: string | null;
   socialLinks?: string | null;
+  seoTitle?: string | null;
+  seoDescription?: string | null;
+  createdAt: Date;
 }
 
 // ============================================================
-// DATA ACCESS FUNCTIONS
+// SHARED COUNT INCLUDE
 // ============================================================
 
-export async function getOrganizationBySlug(slug: string): Promise<OrganizationDetail | null> {
-  const org = await db.organization.findUnique({
-    where: { orgSlug: slug, deletedAt: null },
-    include: {
-      _count: {
-        select: {
-          jobs: { where: { status: 'ACTIVE', deletedAt: null } },
-        },
-      },
+const orgCountInclude = {
+  _count: {
+    select: {
+      jobs: { where: { status: JobStatus.ACTIVE, deletedAt: null } },
+      providedOpportunities: { where: { status: 'ACTIVE' as JobStatus, deletedAt: null } },
     },
-  });
+  },
+};
 
-  if (!org) return null;
-
+function mapOrgToItem(org: any): OrganizationListItem {
   return {
     id: org.id,
     orgName: org.orgName,
@@ -52,50 +52,52 @@ export async function getOrganizationBySlug(slug: string): Promise<OrganizationD
     orgType: org.orgType,
     headquarters: org.headquarters,
     isVerified: org.isVerified,
-    _count: org._count,
+    _count: {
+      jobs: org._count.jobs,
+      providedOpportunities: org._count.providedOpportunities,
+    },
+  };
+}
+
+function mapOrgToDetail(org: any): OrganizationDetail {
+  return {
+    ...mapOrgToItem(org),
     orgWebsite: org.orgWebsite,
     orgDescription: org.orgDescription,
     socialLinks: org.socialLinks,
+    seoTitle: org.seoTitle,
+    seoDescription: org.seoDescription,
+    createdAt: org.createdAt,
   };
+}
+
+// ============================================================
+// DATA ACCESS FUNCTIONS
+// ============================================================
+
+export async function getOrganizationBySlug(slug: string): Promise<OrganizationDetail | null> {
+  const org = await db.organization.findUnique({
+    where: { orgSlug: slug, deletedAt: null },
+    include: orgCountInclude,
+  });
+
+  if (!org) return null;
+  return mapOrgToDetail(org);
 }
 
 export async function getFeaturedOrganizations(limit: number = 8): Promise<OrganizationListItem[]> {
   const orgs = await db.organization.findMany({
-    where: {
-      isActive: true,
-      isVerified: true,
-      deletedAt: null,
-    },
-    include: {
-      _count: {
-        select: {
-          jobs: { where: { status: 'ACTIVE', deletedAt: null } },
-        },
-      },
-    },
+    where: { isActive: true, isVerified: true, deletedAt: null },
+    include: orgCountInclude,
     orderBy: { createdAt: 'desc' },
     take: limit,
   });
-
-  return orgs.map((org) => ({
-    id: org.id,
-    orgName: org.orgName,
-    orgSlug: org.orgSlug,
-    orgLogoUrl: org.orgLogoUrl,
-    orgIndustry: org.orgIndustry as unknown as string,
-    orgType: org.orgType,
-    headquarters: org.headquarters,
-    isVerified: org.isVerified,
-    _count: org._count,
-  }));
+  return orgs.map(mapOrgToItem);
 }
 
 export async function getActiveOrganizationSlugs(): Promise<string[]> {
   const orgs = await db.organization.findMany({
-    where: {
-      isActive: true,
-      deletedAt: null,
-    },
+    where: { isActive: true, deletedAt: null },
     select: { orgSlug: true },
   });
   return orgs.map((o) => o.orgSlug);
@@ -113,28 +115,11 @@ export async function getSimilarOrganizations(
       deletedAt: null,
       id: { not: currentOrgId },
     },
-    include: {
-      _count: {
-        select: {
-          jobs: { where: { status: 'ACTIVE', deletedAt: null } },
-        },
-      },
-    },
+    include: orgCountInclude,
     orderBy: { createdAt: 'desc' },
     take: limit,
   });
-
-  return orgs.map((org) => ({
-    id: org.id,
-    orgName: org.orgName,
-    orgSlug: org.orgSlug,
-    orgLogoUrl: org.orgLogoUrl,
-    orgIndustry: org.orgIndustry as unknown as string,
-    orgType: org.orgType,
-    headquarters: org.headquarters,
-    isVerified: org.isVerified,
-    _count: org._count,
-  }));
+  return orgs.map(mapOrgToItem);
 }
 
 export async function getOrganizationsByType(
@@ -142,33 +127,12 @@ export async function getOrganizationsByType(
   limit: number = 20
 ): Promise<OrganizationListItem[]> {
   const orgs = await db.organization.findMany({
-    where: {
-      orgType: type,
-      isActive: true,
-      deletedAt: null,
-    },
-    include: {
-      _count: {
-        select: {
-          jobs: { where: { status: 'ACTIVE', deletedAt: null } },
-        },
-      },
-    },
+    where: { orgType: type, isActive: true, deletedAt: null },
+    include: orgCountInclude,
     orderBy: { orgName: 'asc' },
     take: limit,
   });
-
-  return orgs.map((org) => ({
-    id: org.id,
-    orgName: org.orgName,
-    orgSlug: org.orgSlug,
-    orgLogoUrl: org.orgLogoUrl,
-    orgIndustry: org.orgIndustry as unknown as string,
-    orgType: org.orgType,
-    headquarters: org.headquarters,
-    isVerified: org.isVerified,
-    _count: org._count,
-  }));
+  return orgs.map(mapOrgToItem);
 }
 
 // ============================================================
@@ -179,6 +143,8 @@ export interface OrganizationSearchParams {
   search?: string;
   orgType?: string;
   orgIndustry?: string;
+  verified?: boolean;
+  sort?: 'name' | 'jobs' | 'recent';
   page?: number;
   limit?: number;
 }
@@ -192,7 +158,15 @@ export interface PaginatedOrganizations {
 }
 
 export async function searchOrganizations(params: OrganizationSearchParams): Promise<PaginatedOrganizations> {
-  const { search, orgType, orgIndustry, page = 1, limit = 24 } = params;
+  const {
+    search,
+    orgType,
+    orgIndustry,
+    verified,
+    sort = 'name',
+    page = 1,
+    limit = 24,
+  } = params;
 
   const where: any = { isActive: true, deletedAt: null };
 
@@ -205,36 +179,48 @@ export async function searchOrganizations(params: OrganizationSearchParams): Pro
   if (orgIndustry) {
     where.orgIndustry = orgIndustry;
   }
+  if (verified !== undefined) {
+    where.isVerified = verified;
+  }
+
+  let orderBy: any;
+  switch (sort) {
+    case 'jobs':
+      // Sort by jobs count requires a different approach — we'll do it in-memory for simplicity
+      orderBy = { orgName: 'asc' };
+      break;
+    case 'recent':
+      orderBy = { createdAt: 'desc' };
+      break;
+    case 'name':
+    default:
+      orderBy = { orgName: 'asc' };
+  }
 
   const [data, total] = await Promise.all([
     db.organization.findMany({
       where,
-      include: {
-        _count: {
-          select: {
-            jobs: { where: { status: 'ACTIVE', deletedAt: null } },
-          },
-        },
-      },
-      orderBy: { orgName: 'asc' },
+      include: orgCountInclude,
+      orderBy,
       skip: (page - 1) * limit,
       take: limit,
     }),
     db.organization.count({ where }),
   ]);
 
+  let mappedData = data.map(mapOrgToItem);
+
+  // In-memory sort for "jobs" (sort by total active listings)
+  if (sort === 'jobs') {
+    mappedData.sort((a, b) => {
+      const aTotal = a._count.jobs + a._count.providedOpportunities;
+      const bTotal = b._count.jobs + b._count.providedOpportunities;
+      return bTotal - aTotal;
+    });
+  }
+
   return {
-    data: data.map((org) => ({
-      id: org.id,
-      orgName: org.orgName,
-      orgSlug: org.orgSlug,
-      orgLogoUrl: org.orgLogoUrl,
-      orgIndustry: org.orgIndustry as unknown as string,
-      orgType: org.orgType,
-      headquarters: org.headquarters,
-      isVerified: org.isVerified,
-      _count: org._count,
-    })),
+    data: mappedData,
     total,
     page,
     limit,

@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { Search } from 'lucide-react';
+import { Search, BadgeCheck, SlidersHorizontal } from 'lucide-react';
 import { OrganizationType, OrganizationIndustry } from '@prisma/client';
 import { searchOrganizations } from '@/lib/data/organizations';
 import { getOrganizationTypeLabel, getOrganizationIndustryLabel } from '@/lib/enums';
@@ -16,6 +16,8 @@ interface PageProps {
     q?: string;
     type?: string;
     industry?: string;
+    verified?: string;
+    sort?: string;
     page?: string;
   }>;
 }
@@ -26,7 +28,7 @@ interface PageProps {
 
 export const metadata: Metadata = {
   title: 'Top Employers & Organizations',
-  description: 'Browse verified employers and organizations hiring in Kenya. Explore company profiles, view open positions, and find your next role at top Kenyan companies.',
+  description: 'Browse verified employers and organizations hiring in Kenya. Explore company profiles, view open positions and opportunities, and find your next role at top Kenyan companies.',
   alternates: { canonical: '/organizations' },
   openGraph: {
     title: 'Top Employers & Organizations | JOBR Kenya',
@@ -47,12 +49,16 @@ export default async function OrganizationsIndexPage({ searchParams }: PageProps
   const q = sp.q || '';
   const type = sp.type || '';
   const industry = sp.industry || '';
+  const verified = sp.verified || '';
+  const sort = sp.sort || '';
   const page = Math.max(1, Number(sp.page) || 1);
 
   const result = await searchOrganizations({
     search: q || undefined,
     orgType: type || undefined,
     orgIndustry: industry || undefined,
+    verified: verified === 'true' ? true : verified === 'false' ? false : undefined,
+    sort: (sort as 'name' | 'jobs' | 'recent') || undefined,
     page,
     limit: 24,
   });
@@ -86,6 +92,27 @@ export default async function OrganizationsIndexPage({ searchParams }: PageProps
     } else if (industry) {
       params.set('industry', industry);
     }
+    if (overrides.verified !== undefined) {
+      if (overrides.verified) params.set('verified', overrides.verified);
+    } else if (verified) {
+      params.set('verified', verified);
+    }
+    if (overrides.sort !== undefined) {
+      if (overrides.sort) params.set('sort', overrides.sort);
+    } else if (sort) {
+      params.set('sort', sort);
+    }
+    const qs = params.toString();
+    return qs ? `/organizations?${qs}` : '/organizations';
+  }
+
+  function sortUrl(sortValue: string) {
+    const params = new URLSearchParams();
+    if (q) params.set('q', q);
+    if (type) params.set('type', type);
+    if (industry) params.set('industry', industry);
+    if (verified) params.set('verified', verified);
+    if (sortValue) params.set('sort', sortValue);
     const qs = params.toString();
     return qs ? `/organizations?${qs}` : '/organizations';
   }
@@ -105,6 +132,8 @@ export default async function OrganizationsIndexPage({ searchParams }: PageProps
     if (page < result.totalPages - 2) paginationPages.push('ellipsis');
     paginationPages.push(result.totalPages);
   }
+
+  const hasActiveFilters = q || type || industry || verified;
 
   return (
     <>
@@ -129,7 +158,7 @@ export default async function OrganizationsIndexPage({ searchParams }: PageProps
             Top Employers & Organizations
           </h1>
           <p className="mt-2 max-w-3xl text-sm text-gray-600">
-            Explore verified employers actively hiring in Kenya. From government ministries and county offices to multinational corporations, NGOs, tech startups, and leading companies across every industry. Click on any organization to view their full profile and all current job openings.
+            Explore verified employers actively hiring in Kenya. From government ministries and county offices to multinational corporations, NGOs, tech startups, and leading companies across every industry. Click on any organization to view their full profile, all current job openings, and available opportunities such as scholarships, grants, and fellowships.
           </p>
         </div>
 
@@ -153,7 +182,55 @@ export default async function OrganizationsIndexPage({ searchParams }: PageProps
             >
               Search
             </button>
+            {hasActiveFilters && (
+              <Link
+                href="/organizations"
+                className="rounded-lg border border-gray-300 px-4 py-2.5 text-sm font-medium text-gray-600 transition hover:bg-gray-100"
+              >
+                Clear all
+              </Link>
+            )}
           </form>
+
+          {/* Sort + Verified toggle row */}
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="flex items-center gap-2">
+              <SlidersHorizontal className="h-4 w-4 text-gray-400" />
+              <span className="text-xs font-semibold uppercase tracking-wider text-gray-500">Sort:</span>
+            </div>
+            {[
+              { value: '', label: 'Name (A-Z)' },
+              { value: 'jobs', label: 'Most Listings' },
+              { value: 'recent', label: 'Recently Added' },
+            ].map((s) => (
+              <Link
+                key={s.value}
+                href={sortUrl(s.value)}
+                className={`rounded-full border px-3 py-1 text-xs font-medium transition ${
+                  sort === s.value
+                    ? 'border-emerald-400 bg-emerald-50 text-emerald-700'
+                    : 'border-gray-200 bg-white/70 text-gray-600 hover:border-emerald-300'
+                }`}
+              >
+                {s.label}
+              </Link>
+            ))}
+
+            <span className="text-gray-300">|</span>
+
+            {/* Verified toggle */}
+            <Link
+              href={filterUrl({ verified: !verified || verified !== 'true' ? 'true' : '' })}
+              className={`flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium transition ${
+                verified === 'true'
+                  ? 'border-emerald-400 bg-emerald-50 text-emerald-700'
+                  : 'border-gray-200 bg-white/70 text-gray-600 hover:border-emerald-300'
+              }`}
+            >
+              <BadgeCheck className="h-3 w-3" />
+              Verified Only
+            </Link>
+          </div>
 
           {/* Filter pills: Type */}
           <div className="flex flex-wrap gap-2">
@@ -201,14 +278,6 @@ export default async function OrganizationsIndexPage({ searchParams }: PageProps
           <p className="text-sm text-gray-500">
             Showing <span className="font-medium text-gray-700">{showingFrom}-{showingTo}</span> of{' '}
             <span className="font-medium text-gray-700">{result.total}</span> organizations
-            {(q || type || industry) && (
-              <button
-                onClick={() => { window.location.href = '/organizations'; }}
-                className="ml-2 text-emerald-600 hover:underline"
-              >
-                Clear filters
-              </button>
-            )}
           </p>
         </div>
 
@@ -222,39 +291,58 @@ export default async function OrganizationsIndexPage({ searchParams }: PageProps
           </div>
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {result.data.map((org) => (
-              <Link
-                key={org.id}
-                href={`/organizations/${org.orgSlug}`}
-                className="group flex items-center gap-4 rounded-xl border border-white/60 bg-white/70 p-5 backdrop-blur-sm transition hover:border-emerald-400 hover:shadow-md"
-              >
-                {org.orgLogoUrl ? (
-                  <img
-                    src={org.orgLogoUrl}
-                    alt={org.orgName}
-                    className="h-12 w-12 rounded-lg border border-gray-100 object-contain"
-                  />
-                ) : (
-                  <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-emerald-50 text-lg font-bold text-emerald-600">
-                    {org.orgName.charAt(0)}
-                  </div>
-                )}
-                <div className="min-w-0 flex-1">
-                  <h2 className="truncate text-sm font-bold text-gray-800 group-hover:text-emerald-600">
-                    {org.orgName}
-                  </h2>
-                  <div className="mt-0.5 flex items-center gap-2 text-xs text-gray-500">
-                    <span>{getOrganizationTypeLabel(org.orgType)}</span>
-                    {org.headquarters && <span>· {org.headquarters}</span>}
-                  </div>
-                  {org._count.jobs > 0 && (
-                    <p className="mt-1 text-xs font-medium text-emerald-600">
-                      {org._count.jobs} open {org._count.jobs === 1 ? 'position' : 'positions'}
-                    </p>
+            {result.data.map((org) => {
+              const totalListings = org._count.jobs + org._count.providedOpportunities;
+
+              return (
+                <Link
+                  key={org.id}
+                  href={`/organizations/${org.orgSlug}`}
+                  className="group flex items-center gap-4 rounded-xl border border-white/60 bg-white/70 p-5 backdrop-blur-sm transition hover:border-emerald-400 hover:shadow-md"
+                >
+                  {org.orgLogoUrl ? (
+                    <img
+                      src={org.orgLogoUrl}
+                      alt={org.orgName}
+                      className="h-12 w-12 rounded-lg border border-gray-100 object-contain"
+                    />
+                  ) : (
+                    <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-emerald-50 text-lg font-bold text-emerald-600">
+                      {org.orgName.charAt(0)}
+                    </div>
                   )}
-                </div>
-              </Link>
-            ))}
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-1.5">
+                      <h2 className="truncate text-sm font-bold text-gray-800 group-hover:text-emerald-600">
+                        {org.orgName}
+                      </h2>
+                      {org.isVerified && (
+                        <BadgeCheck className="h-3.5 w-3.5 shrink-0 text-emerald-500" />
+                      )}
+                    </div>
+                    <div className="mt-0.5 flex items-center gap-2 text-xs text-gray-500">
+                      <span>{getOrganizationTypeLabel(org.orgType)}</span>
+                      {org.headquarters && <span>· {org.headquarters}</span>}
+                    </div>
+                    <div className="mt-1.5 flex items-center gap-2 text-xs">
+                      {org._count.jobs > 0 && (
+                        <span className="font-medium text-emerald-600">
+                          {org._count.jobs} {org._count.jobs === 1 ? 'job' : 'jobs'}
+                        </span>
+                      )}
+                      {org._count.providedOpportunities > 0 && (
+                        <span className="font-medium text-blue-600">
+                          {org._count.providedOpportunities} {org._count.providedOpportunities === 1 ? 'opportunity' : 'opportunities'}
+                        </span>
+                      )}
+                      {totalListings === 0 && (
+                        <span className="text-gray-400">No active listings</span>
+                      )}
+                    </div>
+                  </div>
+                </Link>
+              );
+            })}
           </div>
         )}
 

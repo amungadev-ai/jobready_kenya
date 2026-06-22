@@ -43,6 +43,8 @@ export interface OpportunitySearchParams {
 
 export interface OpportunityDetail extends OpportunityListItem {
   description: string;
+  seoDescription?: string | null;
+  seoTitle?: string | null;
   eligibilityCriteria?: string | null;
   requirements?: string | null;
   benefits?: string | null;
@@ -208,12 +210,96 @@ export async function getAllOpportunitySlugs(): Promise<string[]> {
 }
 
 // ============================================================
+// OPPORTUNITY COUNTS BY TYPE (for filter tab badges)
+// ============================================================
+
+export async function getOpportunityCountsByType(): Promise<Record<OpportunityType, number>> {
+  const counts = await db.opportunity.groupBy({
+    by: ['type'],
+    where: activeOpportunityWhere,
+    _count: { id: true },
+  });
+
+  const map: Record<string, number> = {};
+  for (const c of counts) {
+    map[c.type] = c._count.id;
+  }
+
+  const result = {} as Record<OpportunityType, number>;
+  for (const t of Object.values(OpportunityType)) {
+    result[t] = map[t] ?? 0;
+  }
+  return result;
+}
+
+// ============================================================
+// CLOSING SOON OPPORTUNITIES (deadline within 7 days, not past)
+// ============================================================
+
+export async function getClosingSoonOpportunities(limit: number = 4): Promise<OpportunityListItem[]> {
+  const now = new Date();
+  const sevenDaysFromNow = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+
+  const opps = await db.opportunity.findMany({
+    where: {
+      ...activeOpportunityWhere,
+      deadline: {
+        gte: now,
+        lte: sevenDaysFromNow,
+      },
+    },
+    orderBy: { deadline: 'asc' },
+    take: limit,
+  });
+
+  return opps as unknown as OpportunityListItem[];
+}
+
+// ============================================================
+// OPPORTUNITIES BY PROVIDER (for "More from this provider")
+// ============================================================
+
+export async function getOpportunitiesByProvider(
+  providerName: string,
+  excludeId?: string,
+  limit: number = 5
+): Promise<OpportunityListItem[]> {
+  const where: Record<string, unknown> = {
+    ...activeOpportunityWhere,
+    providerName,
+  };
+
+  if (excludeId) {
+    where.id = { not: excludeId };
+  }
+
+  const opps = await db.opportunity.findMany({
+    where,
+    orderBy: { datePosted: 'desc' },
+    take: limit,
+  });
+
+  return opps as unknown as OpportunityListItem[];
+}
+
+// ============================================================
+// OPPORTUNITY COUNT FOR ORGANIZATION
+// ============================================================
+
+export async function getOpportunityCountForOrganization(orgId: string): Promise<number> {
+  return db.opportunity.count({
+    where: { ...activeOpportunityWhere, providerOrgId: orgId },
+  });
+}
+
+// ============================================================
 // SIMILAR OPPORTUNITIES
 // ============================================================
 
 export async function getSimilarOpportunities(
   opportunityId: string,
   type?: OpportunityType,
+  county?: string,
   limit: number = 5
 ): Promise<OpportunityListItem[]> {
   const where: Record<string, unknown> = {
@@ -225,6 +311,10 @@ export async function getSimilarOpportunities(
     where.type = type;
   }
 
+  if (county) {
+    where.locationCounty = { contains: county };
+  }
+
   const opps = await db.opportunity.findMany({
     where,
     orderBy: { datePosted: 'desc' },
@@ -232,4 +322,22 @@ export async function getSimilarOpportunities(
   });
 
   return opps as unknown as OpportunityListItem[];
+}
+
+// ============================================================
+// OPPORTUNITY STATS (for index page summary)
+// ============================================================
+
+export async function getOpportunityTypeStats(): Promise<{ type: OpportunityType; count: number }[]> {
+  const counts = await db.opportunity.groupBy({
+    by: ['type'],
+    where: activeOpportunityWhere,
+    _count: { id: true },
+    orderBy: { _count: { id: 'desc' } },
+  });
+
+  return counts.map((c) => ({
+    type: c.type as OpportunityType,
+    count: c._count.id,
+  }));
 }
