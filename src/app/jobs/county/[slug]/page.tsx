@@ -36,7 +36,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   // Strategy 5: NoIndex empty county pages
   const jobCount = await getJobCount({
-    locationCounty: { equals: county.name, mode: 'insensitive' as const },
+    locationCounty: { equals: county.name },
   }).catch(() => 0);
   const isEmpty = jobCount === 0;
 

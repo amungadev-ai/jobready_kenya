@@ -119,8 +119,8 @@ export default async function JobsPage({ searchParams }: PageProps) {
   const [jobsResult, categories] = await Promise.all([
     searchJobs({
       query,
-      employmentType: employmentType as string | undefined,
-      experienceLevel: experienceLevel as string | undefined,
+      employmentType,
+      experienceLevel,
       locationCounty: county,
       categoryId,
       isRemote,

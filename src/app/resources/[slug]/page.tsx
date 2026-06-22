@@ -235,7 +235,7 @@ export default async function ArticlePage({ params }: Props) {
 
   const articleSchema = {
     '@context': 'https://schema.org',
-    '@type': 'article',
+    '@type': 'Article',
     headline: article.title,
     description: article.description,
     datePublished: article.date,

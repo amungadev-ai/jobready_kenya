@@ -7,4 +7,6 @@ db/
 examples/
 Caddyfile
 bun.lock
-*.tsbuildinfo
+*.tsbuildinfo.next/
+tsconfig.tsbuildinfo
+next-env.d.ts

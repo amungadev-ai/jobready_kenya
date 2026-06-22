@@ -84,24 +84,7 @@ const ARTICLES: Article[] = [
     readTime: '9 min read',
     date: '15 Dec 2025',
   },
-  {
-    slug: 'career-growth-strategies',
-    title: '5 Career Growth Strategies for Young Kenyan Professionals',
-    description:
-      'Practical advice on building your career in Kenya — from networking and mentorship to upskilling and positioning yourself for promotions.',
-    category: 'Career Growth',
-    readTime: '6 min read',
-    date: '10 Dec 2025',
-  },
-  {
-    slug: 'prepare-for-technical-interviews',
-    title: 'How to Prepare for Technical Interviews in Kenya',
-    description:
-      'Coding challenges, system design rounds, and take-home assignments — what to expect in Kenyan tech interviews and how to prepare effectively.',
-    category: 'Interview Prep',
-    readTime: '8 min read',
-    date: '5 Dec 2025',
-  },
+
 ];
 
 const CATEGORY_COLORS: Record<Category, string> = {
@@ -150,7 +133,7 @@ export function ResourcesClient() {
         {filtered.map((article) => (
           <a
             key={article.slug}
-            href={`#${article.slug}`}
+            href={`/resources/${article.slug}`}
             className="group flex flex-col rounded-xl border border-gray-200/60 bg-white/70 p-6 backdrop-blur-sm transition hover:shadow-md"
           >
             <div className="mb-3 flex items-center justify-between">

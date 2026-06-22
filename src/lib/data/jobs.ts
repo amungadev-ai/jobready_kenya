@@ -9,6 +9,7 @@ export interface JobWithOrg {
   id: string;
   title: string;
   slug: string;
+  description?: string;
   organizationId?: string | null;
   locationCity?: string | null;
   locationCounty?: string | null;
@@ -106,6 +107,7 @@ const jobListInclude = {
       slug: true,
     },
   },
+  // Note: description is a top-level field, not an include
 } as const;
 
 const jobDetailInclude = {
@@ -344,9 +346,9 @@ export async function searchJobs(
 
   if (query) {
     where.OR = [
-      { title: { contains: query, mode: 'insensitive' } },
-      { searchText: { contains: query, mode: 'insensitive' } },
-      { organization: { orgName: { contains: query, mode: 'insensitive' } } },
+      { title: { contains: query } },
+      { searchText: { contains: query } },
+      { organization: { orgName: { contains: query } } },
     ];
   }
 
@@ -355,7 +357,7 @@ export async function searchJobs(
   }
 
   if (locationCounty) {
-    where.locationCounty = { contains: locationCounty, mode: 'insensitive' };
+    where.locationCounty = { contains: locationCounty };
   }
 
   if (categoryId) {
@@ -490,7 +492,7 @@ export async function getJobCountByCategoryAndCounty(
     where: {
       ...activeJobWhere,
       category: { slug: categorySlug },
-      locationCounty: { equals: countyName, mode: 'insensitive' as const },
+      locationCounty: { equals: countyName },
     },
   });
 }
@@ -533,7 +535,7 @@ export async function getGovernmentJobs(
 }
 
 export async function getGovernmentJobsByType(
-  orgType: OrganizationType.NATIONAL_GOVERNMENT | OrganizationType.COUNTY_GOVERNMENT,
+  orgType: OrganizationType,
   page: number = 1,
   limit: number = 20
 ): Promise<PaginatedResult<JobWithOrg>> {
@@ -568,9 +570,8 @@ export async function getGovernmentJobsByType(
 // MAPPING HELPERS
 // ============================================================
 
-type RawJobListRow = Awaited<ReturnType<typeof db.job.findMany>>[number] & {
-  organization?: { orgType: OrganizationType; orgIndustry: OrganizationIndustry } | null;
-};
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type RawJobListRow = any;
 
 type RawJobDetailRow = NonNullable<Awaited<ReturnType<typeof getJobBySlugRaw>>>;
 
@@ -586,6 +587,7 @@ function mapJobWithOrg(job: RawJobListRow): JobWithOrg {
     id: job.id,
     title: job.title,
     slug: job.slug,
+    description: job.description,
     organizationId: job.organizationId,
     locationCity: job.locationCity,
     locationCounty: job.locationCounty,
@@ -608,9 +610,9 @@ function mapJobWithOrg(job: RawJobListRow): JobWithOrg {
           orgLogoUrl: job.organization.orgLogoUrl,
           orgType: job.organization.orgType,
           orgIndustry: job.organization.orgIndustry,
-          orgWebsite: (job.organization as any).orgWebsite ?? null,
-          headquarters: (job.organization as any).headquarters ?? null,
-          orgDescription: (job.organization as any).orgDescription ?? null,
+          orgWebsite: 'orgWebsite' in job.organization ? (job.organization as any).orgWebsite : null,
+          headquarters: 'headquarters' in job.organization ? (job.organization as any).headquarters : null,
+          orgDescription: 'orgDescription' in job.organization ? (job.organization as any).orgDescription : null,
         }
       : null,
     category: job.category
