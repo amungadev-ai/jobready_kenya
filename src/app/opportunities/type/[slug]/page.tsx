@@ -34,7 +34,7 @@ import type { OpportunityListItem } from '@/lib/data/opportunities';
 // DYNAMIC RENDERING
 // ============================================================
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 120; // 2 min
 
 // ============================================================
 // TYPES

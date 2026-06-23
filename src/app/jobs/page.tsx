@@ -1,8 +1,8 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Search } from 'lucide-react';
-import { searchJobs, getFeaturedJobs } from '@/lib/data/jobs';
-import { getAllCategories } from '@/lib/data/categories';
+import { cachedSearchJobs } from '@/lib/cached-data';
+import { cachedGetAllCategories } from '@/lib/cached-data';
 import { slugToEmploymentType, slugToExperienceLevel, employmentTypeToSlug } from '@/lib/enums';
 import { BreadcrumbNav } from '@/components/shared/BreadcrumbNav';
 import { generateBreadcrumbSchema, generateCollectionPageSchema } from '@/lib/utils/seo';
@@ -121,19 +121,19 @@ export default async function JobsPage({ searchParams }: PageProps) {
 
   try {
     [jobsResult, categories] = await Promise.all([
-      searchJobs({
-        query,
-        employmentType,
-        experienceLevel,
-        locationCounty: county,
-        categoryId,
-        isRemote,
-        hasSalary,
-        sort: (params.sort as any) || undefined,
+      cachedSearchJobs(
+        query || '',
+        employmentType?.toString() || '',
+        county || '',
+        categoryId || '',
+        experienceLevel?.toString() || '',
+        isRemote === true ? 'true' : isRemote === false ? 'false' : '',
+        hasSalary === true ? 'true' : '',
+        (params.sort as any) || '',
         page,
         limit,
-      }),
-      getAllCategories(),
+      ),
+      cachedGetAllCategories(),
     ]);
   } catch (err) {
     console.error('JobsPage data fetch error:', err);

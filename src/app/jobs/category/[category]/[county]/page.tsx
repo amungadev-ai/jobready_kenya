@@ -13,7 +13,7 @@ import { generateBreadcrumbSchema, generateCollectionPageSchema } from '@/lib/ut
 // RENDERING MODE
 // ============================================================
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 120; // 2 min
 
 // ============================================================
 // TYPES

@@ -18,7 +18,7 @@ import {
 // RENDERING MODE
 // ============================================================
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 300; // cache for 5 min, revalidate in background
 
 // ============================================================
 // TYPES

@@ -3,10 +3,10 @@ import Link from 'next/link';
 import { SearchX, Clock, Star, Search, AlertTriangle } from 'lucide-react';
 import { OpportunityType } from '@prisma/client';
 import {
-  searchOpportunities,
-  getOpportunityCountsByType,
-  getClosingSoonOpportunities,
-} from '@/lib/data/opportunities';
+  cachedSearchOpportunities,
+  cachedGetOpportunityCountsByType,
+  cachedGetClosingSoonOpportunities,
+} from '@/lib/cached-data';
 import {
   OpportunityTypeLabels,
   OpportunityTypeColors,
@@ -455,15 +455,18 @@ export default async function OpportunitiesHubPage({ searchParams }: PageProps) 
 
   try {
     [result, typeCounts, closingSoon] = await Promise.all([
-      searchOpportunities({
-        query,
-        type: type as OpportunityType | undefined,
-        sort: (params.sort as 'newest' | 'deadline-soon' | 'deadline-later') || undefined,
+      cachedSearchOpportunities(
+        query || '',
+        type ? type.toString() : '',
+        '',
+        (params.sort as 'newest' | 'deadline-soon' | 'deadline-later') || '',
         page,
         limit,
-      }),
-      getOpportunityCountsByType().catch(() => ({} as Record<OpportunityType, number>)),
-      !query && !type ? getClosingSoonOpportunities(4).catch(() => []) : Promise.resolve([]),
+      ),
+      cachedGetOpportunityCountsByType(),
+      !query && !type
+        ? cachedGetClosingSoonOpportunities(4)
+        : Promise.resolve([] as any[]),
     ]);
   } catch (err) {
     console.error('OpportunitiesHubPage error:', err);

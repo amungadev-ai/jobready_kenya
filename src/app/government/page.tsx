@@ -15,7 +15,7 @@ import {
 import { generateBreadcrumbSchema, generateCollectionPageSchema } from '@/lib/utils/seo';
 import { Building2, Landmark, SearchX } from 'lucide-react';
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 120; // 2 min
 
 // ============================================================
 // METADATA

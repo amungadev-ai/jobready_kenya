@@ -8,16 +8,7 @@ import { SectionHeading } from '@/components/shared/SectionHeading';
 import { HubPageContent } from '@/components/hubs/HubPageContent';
 import { generateBreadcrumbSchema, generateCollectionPageSchema } from '@/lib/utils/seo';
 
-export const dynamic = 'force-dynamic';
-
-// ============================================================
-// TYPES
-// ============================================================
-
-interface PageProps {
-  params: Promise<{ category: string }>;
-  searchParams: Promise<{ page?: string }>;
-}
+export const revalidate = 120; // 2 min
 
 // ============================================================
 // STATIC PARAMS (ISR)

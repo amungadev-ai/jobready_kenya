@@ -41,7 +41,7 @@ import { GoogleAdPlaceholder, SmartMatchingWidget } from '@/components/shared/Ma
 // RENDERING MODE
 // ============================================================
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 300; // 5 min
 
 // ============================================================
 // TYPES

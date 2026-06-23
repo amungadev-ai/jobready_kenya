@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Search, BadgeCheck, SlidersHorizontal } from 'lucide-react';
 import { OrganizationType, OrganizationIndustry } from '@prisma/client';
-import { searchOrganizations } from '@/lib/data/organizations';
+import { cachedSearchOrganizations } from '@/lib/cached-data';
 import { getOrganizationTypeLabel, getOrganizationIndustryLabel } from '@/lib/enums';
 import { BreadcrumbNav } from '@/components/shared/BreadcrumbNav';
 import { generateBreadcrumbSchema, generateItemListSchema } from '@/lib/utils/seo';
@@ -55,15 +55,15 @@ export default async function OrganizationsIndexPage({ searchParams }: PageProps
 
   let result = { data: [] as any[], total: 0, page, limit: 24, totalPages: 0 };
   try {
-    result = await searchOrganizations({
-      search: q || undefined,
-      orgType: type || undefined,
-      orgIndustry: industry || undefined,
-      verified: verified === 'true' ? true : verified === 'false' ? false : undefined,
-      sort: (sort as 'name' | 'jobs' | 'recent') || undefined,
+    result = await cachedSearchOrganizations(
+      q || '',
+      type || '',
+      industry || '',
+      verified || '',
+      sort || '',
       page,
-      limit: 24,
-  });
+      24,
+    );
   } catch (err) {
     console.error('OrganizationsIndexPage error:', err);
   }

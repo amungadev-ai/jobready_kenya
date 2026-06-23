@@ -40,7 +40,7 @@ import { generateBreadcrumbSchema, formatRelativeDate, formatDeadlineCountdown }
 import { Badge } from '@/components/ui/badge';
 import type { OpportunityListItem } from '@/lib/data/opportunities';
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 300; // 5 min
 
 // ============================================================
 // TYPES
