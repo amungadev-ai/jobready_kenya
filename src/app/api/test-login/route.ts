@@ -1,43 +1,25 @@
 import { NextResponse } from 'next/server'
-import bcrypt from 'bcryptjs'
-import { db, testDbConnection } from '@/lib/db'
 
 export async function POST(req: Request) {
   try {
-    const { email, password } = await req.json()
-
-    // 1. Test DB connection
-    const health = await testDbConnection()
-    if (!health.ok) {
-      return NextResponse.json({ step: 'db_connection', error: health.error, details: health }, { status: 500 })
+    // Step 0: parse body safely
+    let body: any
+    try {
+      body = await req.json()
+    } catch (e: any) {
+      return NextResponse.json({ step: 'parse', error: 'Could not parse JSON body', detail: e.message })
     }
 
-    // 2. Find user
-    const user = await db.user.findUnique({ where: { email } })
-    if (!user) {
-      return NextResponse.json({ step: 'user_lookup', error: 'User not found', email })
-    }
+    const { email, password } = body
+    return NextResponse.json({ step: 'parsed', email: email || '(missing)', hasPassword: !!password })
 
-    // 3. Check active + password
-    if (!user.isActive) {
-      return NextResponse.json({ step: 'active_check', error: 'User is not active', email })
-    }
-    if (!user.password) {
-      return NextResponse.json({ step: 'password_check', error: 'User has no password set', email })
-    }
-
-    // 4. Verify bcrypt
-    const isValid = await bcrypt.compare(password, user.password)
-    if (!isValid) {
-      return NextResponse.json({ step: 'bcrypt_verify', error: 'Password mismatch', email })
-    }
-
-    return NextResponse.json({
-      step: 'success',
-      user: { id: user.id, email: user.email, name: user.name, role: user.role, isActive: user.isActive },
-      dbHealth: { latencyMs: health.latencyMs, isVercel: health.isVercel },
-    })
+    // --- We'll add DB steps back once we confirm basic parsing works ---
   } catch (err: any) {
-    return NextResponse.json({ step: 'exception', error: err.message, code: err.code }, { status: 500 })
+    return NextResponse.json({ step: 'exception', error: err?.message || String(err), code: err?.code }, { status: 500 })
   }
+}
+
+// Simple GET to test the endpoint is alive
+export async function GET() {
+  return NextResponse.json({ alive: true, timestamp: new Date().toISOString() })
 }
