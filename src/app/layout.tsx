@@ -4,6 +4,7 @@ import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
+import AuthProvider from "@/components/AuthProvider";
 
 const nunito = Nunito({
   variable: "--font-nunito",
@@ -63,12 +64,14 @@ export default function RootLayout({
         className={`${nunito.variable} antialiased`}
         style={{ background: '#faf9f6' }}
       >
-        <div className="flex min-h-screen flex-col">
-          <SiteHeader />
-          <main className="flex-1">{children}</main>
-          <SiteFooter />
-        </div>
-        <Toaster />
+        <AuthProvider>
+          <div className="site-wrapper flex min-h-screen flex-col">
+            <SiteHeader />
+            <main className="flex-1">{children}</main>
+            <SiteFooter />
+          </div>
+          <Toaster />
+        </AuthProvider>
       </body>
     </html>
   );

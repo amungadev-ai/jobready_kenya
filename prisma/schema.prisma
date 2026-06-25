@@ -178,6 +178,7 @@ model Organization {
 
   jobs                  Job[]
   providedOpportunities Opportunity[]
+  employerUsers          User[]
 
   @@index([orgIndustry, orgType])
   @@index([deletedAt])
@@ -233,6 +234,7 @@ model JobSubcategory {
 
 model Job {
   id             String  @id @default(cuid())
+  postedById     String? @map("posted_by_id")
   organizationId String? @map("organization_id")
   subcategoryId  String  @map("subcategory_id")
   categoryId     String? @map("category_id")
@@ -277,10 +279,14 @@ model Job {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
+  postedBy     User?           @relation("JobPoster", fields: [postedById], references: [id], onDelete: SetNull)
   organization Organization?  @relation(fields: [organizationId], references: [id], onDelete: SetNull)
   category     JobCategory?   @relation(fields: [categoryId], references: [id])
   subcategory  JobSubcategory @relation(fields: [subcategoryId], references: [id])
+  applications  JobApplication[]
+  savedByUsers SavedJob[]  @relation("SavedJobs")
 
+  @@index([postedById])
   @@index([status])
   @@index([featured])
   @@index([employmentType])
@@ -354,6 +360,135 @@ model Opportunity {
   @@index([status, featured])
   @@index([deletedAt])
   @@map("opportunities")
+}
+
+// ============================================================
+// USER & AUTH MODELS
+// ============================================================
+
+enum UserRole {
+  JOBSEEKER
+  EMPLOYER
+  ADMIN
+}
+
+enum ApplicationStatus {
+  PENDING
+  REVIEWED
+  SHORTLISTED
+  REJECTED
+  HIRED
+}
+
+model User {
+  id            String   @id @default(cuid())
+  name          String?
+  email         String   @unique
+  emailVerified DateTime? @map("email_verified_at")
+  password      String?
+  image         String?
+  role          UserRole @default(JOBSEEKER)
+  phone         String?
+  bio           String?  @db.Text
+  location      String?
+  resumeUrl     String?  @map("resume_url")
+  linkedinUrl   String?  @map("linkedin_url")
+  websiteUrl    String?  @map("website_url")
+  educationLevel EducationLevel? @map("education_level")
+  experienceYears Int?   @map("experience_years")
+  skills        String?  @db.Text
+  isActive      Boolean  @default(true) @map("is_active")
+
+  companyName        String? @map("company_name")
+  companyLogoUrl     String? @map("company_logo_url")
+  companyDescription String? @map("company_description") @db.Text
+  companyIndustry    String? @map("company_industry")
+  companySize        String? @map("company_size")
+  companyWebsite     String? @map("company_website")
+  companyLocation    String? @map("company_location")
+  organizationId     String? @map("organization_id")
+
+  organization  Organization?  @relation(fields: [organizationId], references: [id], onDelete: SetNull)
+  applications  JobApplication[]
+  savedJobs     SavedJob[]
+  postedJobs    Job[]          @relation("JobPoster")
+  accounts      Account[]
+  sessions      Session[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([role])
+  @@index([isActive])
+  @@index([email])
+  @@map("users")
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String  @map("user_id")
+  type              String
+  provider          String
+  providerAccountId String  @map("provider_account_id")
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique @map("session_token")
+  userId       String   @map("user_id")
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model JobApplication {
+  id          String            @id @default(cuid())
+  userId      String            @map("user_id")
+  jobId       String            @map("job_id")
+  status      ApplicationStatus @default(PENDING)
+  coverLetter String?           @db.Text
+  resumeUrl   String?           @map("resume_url")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  job  Job  @relation(fields: [jobId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@unique([userId, jobId])
+  @@index([userId])
+  @@index([jobId])
+  @@index([status])
+  @@map("job_applications")
+}
+
+model SavedJob {
+  id        String   @id @default(cuid())
+  userId    String   @map("user_id")
+  jobId     String   @map("job_id")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  job  Job  @relation("SavedJobs", fields: [jobId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@unique([userId, jobId])
+  @@index([userId])
+  @@map("saved_jobs")
 }
 
 // ============================================================
